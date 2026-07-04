@@ -33,13 +33,20 @@ class FetchImageDimensionsJob extends AbstractJob
     protected $editedAt;
 
     /**
+     * @var bool
+     */
+    protected $forceRetry;
+
+    /**
      * @param int $postId
      * @param string|null $editedAt
+     * @param bool $forceRetry
      */
-    public function __construct(int $postId, ?string $editedAt)
+    public function __construct(int $postId, ?string $editedAt, bool $forceRetry = false)
     {
         $this->postId = $postId;
         $this->editedAt = $editedAt;
+        $this->forceRetry = $forceRetry;
     }
 
     public function handle()
@@ -92,6 +99,11 @@ class FetchImageDimensionsJob extends AbstractJob
                 continue;
             }
 
+            // Skip if it previously failed, unless we are forcing a retry
+            if ($img->hasAttribute('data-image-dimension-failed') && !$this->forceRetry) {
+                continue;
+            }
+
             // Fetch dimensions using Guzzle
             try {
                 $client = new Client(['timeout' => 5]);
@@ -114,12 +126,24 @@ class FetchImageDimensionsJob extends AbstractJob
                         if ($size !== false) {
                             $img->setAttribute('width', (string)$size[0]);
                             $img->setAttribute('height', (string)$size[1]);
+                            $img->removeAttribute('data-image-dimension-failed');
+                            $hasChanges = true;
+                        } else {
+                            $img->setAttribute('data-image-dimension-failed', '1');
                             $hasChanges = true;
                         }
+                    } else {
+                        $img->setAttribute('data-image-dimension-failed', '1');
+                        $hasChanges = true;
                     }
+                } else {
+                    $img->setAttribute('data-image-dimension-failed', '1');
+                    $hasChanges = true;
                 }
             } catch (Exception $e) {
-                // Ignore exceptions (e.g., timeout, 404)
+                // Ignore exceptions (e.g., timeout, 404) but mark as failed
+                $img->setAttribute('data-image-dimension-failed', '1');
+                $hasChanges = true;
             }
         }
 
