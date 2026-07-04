@@ -1,14 +1,26 @@
 <?php
 
+/*
+ * This file is part of huoxin/auto-image-dimensions.
+ *
+ * Copyright (c) 2026 huoxin.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace Huoxin\AutoImageDimensions\Job;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
+use DOMDocument;
+use DOMElement;
+use Exception;
+use Flarum\Post\Post;
+use Flarum\Queue\AbstractJob;
+use GuzzleHttp\Client;
 
-class FetchImageDimensionsJob implements ShouldQueue
+class FetchImageDimensionsJob extends AbstractJob
 {
-    use Queueable, SerializesModels;
 
     /**
      * @var int
@@ -32,8 +44,8 @@ class FetchImageDimensionsJob implements ShouldQueue
 
     public function handle()
     {
-        /** @var \Flarum\Post\Post|null $post */
-        $post = \Flarum\Post\Post::find($this->postId);
+        /** @var Post|null $post */
+        $post = Post::find($this->postId);
 
         if (!$post || !$post->parsed_content) {
             return;
@@ -42,7 +54,7 @@ class FetchImageDimensionsJob implements ShouldQueue
         // Race condition prevention
         // If the post was edited after this job was queued, we abort.
         if ($this->editedAt !== null && $post->edited_at !== null) {
-            $jobEditedAt = \Carbon\Carbon::parse($this->editedAt);
+            $jobEditedAt = Carbon::parse($this->editedAt);
             if ($post->edited_at->gt($jobEditedAt)) {
                 return;
             }
@@ -52,7 +64,7 @@ class FetchImageDimensionsJob implements ShouldQueue
         // Flarum uses <r> or <t> as root tags.
         $xml = $post->parsed_content;
         
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument();
         // Suppress warnings for invalid XML/HTML
         $internalErrors = libxml_use_internal_errors(true);
         // Load the XML. We add an XML declaration to ensure UTF-8 handling if needed,
@@ -68,7 +80,7 @@ class FetchImageDimensionsJob implements ShouldQueue
         $hasChanges = false;
 
         foreach ($images as $img) {
-            /** @var \DOMElement $img */
+            /** @var DOMElement $img */
             
             // Check if it already has dimensions
             if ($img->hasAttribute('width') && $img->hasAttribute('height')) {
@@ -82,7 +94,7 @@ class FetchImageDimensionsJob implements ShouldQueue
 
             // Fetch dimensions using Guzzle
             try {
-                $client = new \GuzzleHttp\Client(['timeout' => 5]);
+                $client = new Client(['timeout' => 5]);
                 // We use stream to not download the whole image if possible, but for getimagesize we need a local file or wrapper
                 // For simplicity and safety, we fetch it into a temp stream
                 $response = $client->request('GET', $src, ['stream' => true]);
@@ -106,7 +118,7 @@ class FetchImageDimensionsJob implements ShouldQueue
                         }
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Ignore exceptions (e.g., timeout, 404)
             }
         }
@@ -117,7 +129,7 @@ class FetchImageDimensionsJob implements ShouldQueue
             $newXml = $dom->saveXML($dom->documentElement);
             
             // We update quietly via the query builder to avoid dispatching another Revised event
-            \Flarum\Post\Post::where('id', $post->id)->update(['parsed_content' => $newXml]);
+            Post::where('id', $post->id)->update(['parsed_content' => $newXml]);
         }
     }
 }
