@@ -22,4 +22,7 @@ return [
     
     (new Extend\Event())
         ->subscribe(Listener\QueueImageDimensionsFetch::class),
+        
+    (new Extend\Console())
+        ->command(Console\BackfillImageDimensionsCommand::class),
 ];
