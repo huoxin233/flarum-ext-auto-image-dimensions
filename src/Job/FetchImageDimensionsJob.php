@@ -18,6 +18,7 @@ use Exception;
 use Flarum\Post\Post;
 use Flarum\Queue\AbstractJob;
 use GuzzleHttp\Client;
+use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 
 class FetchImageDimensionsJob extends AbstractJob
 {
@@ -71,66 +72,9 @@ class FetchImageDimensionsJob extends AbstractJob
         // Flarum uses <r> or <t> as root tags.
         $xml = $post->parsed_content;
 
-        $dom = new DOMDocument();
-        // Suppress warnings for invalid XML/HTML
-        $internalErrors = libxml_use_internal_errors(true);
-        // Load the XML. We add an XML declaration to ensure UTF-8 handling and strict parsing.
-        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$xml);
-
-        libxml_use_internal_errors($internalErrors);
-
-        if (! $success) {
-            return;
-        }
-
-        $images = $dom->getElementsByTagName('IMG');
-        $hasChanges = false;
-
-        foreach ($images as $img) {
-            /** @var DOMElement $img */
-
-            $hasUserWidth = $img->hasAttribute('width');
-            $hasUserHeight = $img->hasAttribute('height');
-            
-            $userWidthVal = $hasUserWidth ? (float) $img->getAttribute('width') : 0;
-            $userHeightVal = $hasUserHeight ? (float) $img->getAttribute('height') : 0;
-
-            // Flarum's BBCode parser can drop 'width' or 'height' if they aren't provided in strict pairs.
-            // We extract them manually from the raw <s> tag markdown to ensure we respect user intent.
-            if (!$hasUserWidth || !$hasUserHeight) {
-                $sTags = $img->getElementsByTagName('s');
-                if ($sTags->length > 0) {
-                    $rawText = $sTags->item(0)->nodeValue;
-                    
-                    if (!$hasUserWidth && preg_match('/width=[\'"]?(\d+)/i', $rawText, $wMatch)) {
-                        $hasUserWidth = true;
-                        $userWidthVal = (float) $wMatch[1];
-                        $img->setAttribute('width', (string) $userWidthVal);
-                    }
-                    if (!$hasUserHeight && preg_match('/height=[\'"]?(\d+)/i', $rawText, $hMatch)) {
-                        $hasUserHeight = true;
-                        $userHeightVal = (float) $hMatch[1];
-                        $img->setAttribute('height', (string) $userHeightVal);
-                    }
-                }
-            }
-
-            // Check if it already has both dimensions
-            if ($hasUserWidth && $hasUserHeight) {
-                continue;
-            }
-
-            $src = $img->getAttribute('src');
-            if (! $src) {
-                continue;
-            }
-
-            // Skip if it previously failed, unless we are forcing a retry
-            if ($img->hasAttribute('data-image-dimension-failed') && ! $this->forceRetry) {
-                continue;
-            }
-
-            // Fetch dimensions using Guzzle
+        $processor = new ImageXmlProcessor();
+        
+        $newXml = $processor->process($xml, function(string $src) {
             try {
                 $client = new Client(['timeout' => 5]);
                 // We use stream to not download the whole image if possible, but for getimagesize we need a local file or wrapper
@@ -150,50 +94,18 @@ class FetchImageDimensionsJob extends AbstractJob
                         unlink($tmpFile);
 
                         if ($size !== false) {
-                            $realWidth = $size[0];
-                            $realHeight = $size[1];
-
-                            if ($hasUserWidth && !$hasUserHeight) {
-                                // User defined width, calculate height to preserve aspect ratio
-                                if ($realWidth > 0) {
-                                    $calcHeight = round($userWidthVal * ($realHeight / $realWidth));
-                                    $img->setAttribute('height', (string) $calcHeight);
-                                }
-                            } elseif ($hasUserHeight && !$hasUserWidth) {
-                                // User defined height, calculate width to preserve aspect ratio
-                                if ($realHeight > 0) {
-                                    $calcWidth = round($userHeightVal * ($realWidth / $realHeight));
-                                    $img->setAttribute('width', (string) $calcWidth);
-                                }
-                            } else {
-                                // Neither defined, inject true dimensions
-                                $img->setAttribute('width', (string) $realWidth);
-                                $img->setAttribute('height', (string) $realHeight);
-                            }
-
-                            $img->removeAttribute('data-image-dimension-failed');
-                            $hasChanges = true;
-                        } else {
-                            $img->setAttribute('data-image-dimension-failed', '1');
-                            $hasChanges = true;
+                            return [(int) $size[0], (int) $size[1]];
                         }
-                    } else {
-                        $img->setAttribute('data-image-dimension-failed', '1');
-                        $hasChanges = true;
                     }
-                } else {
-                    $img->setAttribute('data-image-dimension-failed', '1');
-                    $hasChanges = true;
                 }
             } catch (Exception $e) {
                 // Ignore exceptions (e.g., timeout, 404) but mark as failed
-                $img->setAttribute('data-image-dimension-failed', '1');
-                $hasChanges = true;
             }
-        }
+            
+            return false;
+        }, $this->forceRetry);
 
-        if ($hasChanges) {
-            $newXml = $dom->saveXML($dom->documentElement);
+        if ($newXml !== false) {
             Post::where('id', $post->id)->update(['content' => $newXml]);
         }
     }
