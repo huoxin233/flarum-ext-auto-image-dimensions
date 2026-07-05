@@ -89,8 +89,34 @@ class FetchImageDimensionsJob extends AbstractJob
         foreach ($images as $img) {
             /** @var DOMElement $img */
 
-            // Check if it already has dimensions
-            if ($img->hasAttribute('width') && $img->hasAttribute('height')) {
+            $hasUserWidth = $img->hasAttribute('width');
+            $hasUserHeight = $img->hasAttribute('height');
+            
+            $userWidthVal = $hasUserWidth ? (float) $img->getAttribute('width') : 0;
+            $userHeightVal = $hasUserHeight ? (float) $img->getAttribute('height') : 0;
+
+            // Flarum's BBCode parser can drop 'width' or 'height' if they aren't provided in strict pairs.
+            // We extract them manually from the raw <s> tag markdown to ensure we respect user intent.
+            if (!$hasUserWidth || !$hasUserHeight) {
+                $sTags = $img->getElementsByTagName('s');
+                if ($sTags->length > 0) {
+                    $rawText = $sTags->item(0)->nodeValue;
+                    
+                    if (!$hasUserWidth && preg_match('/width=[\'"]?(\d+)/i', $rawText, $wMatch)) {
+                        $hasUserWidth = true;
+                        $userWidthVal = (float) $wMatch[1];
+                        $img->setAttribute('width', (string) $userWidthVal);
+                    }
+                    if (!$hasUserHeight && preg_match('/height=[\'"]?(\d+)/i', $rawText, $hMatch)) {
+                        $hasUserHeight = true;
+                        $userHeightVal = (float) $hMatch[1];
+                        $img->setAttribute('height', (string) $userHeightVal);
+                    }
+                }
+            }
+
+            // Check if it already has both dimensions
+            if ($hasUserWidth && $hasUserHeight) {
                 continue;
             }
 
@@ -124,8 +150,27 @@ class FetchImageDimensionsJob extends AbstractJob
                         unlink($tmpFile);
 
                         if ($size !== false) {
-                            $img->setAttribute('width', (string) $size[0]);
-                            $img->setAttribute('height', (string) $size[1]);
+                            $realWidth = $size[0];
+                            $realHeight = $size[1];
+
+                            if ($hasUserWidth && !$hasUserHeight) {
+                                // User defined width, calculate height to preserve aspect ratio
+                                if ($realWidth > 0) {
+                                    $calcHeight = round($userWidthVal * ($realHeight / $realWidth));
+                                    $img->setAttribute('height', (string) $calcHeight);
+                                }
+                            } elseif ($hasUserHeight && !$hasUserWidth) {
+                                // User defined height, calculate width to preserve aspect ratio
+                                if ($realHeight > 0) {
+                                    $calcWidth = round($userHeightVal * ($realWidth / $realHeight));
+                                    $img->setAttribute('width', (string) $calcWidth);
+                                }
+                            } else {
+                                // Neither defined, inject true dimensions
+                                $img->setAttribute('width', (string) $realWidth);
+                                $img->setAttribute('height', (string) $realHeight);
+                            }
+
                             $img->removeAttribute('data-image-dimension-failed');
                             $hasChanges = true;
                         } else {
