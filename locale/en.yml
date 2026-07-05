@@ -1,7 +1,17 @@
 huoxin-auto-image-dimensions:
-  # For more details on the format
-  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    my_cool_key: My Cool Key
-
-  forum:
+    schedule_interval_label: Schedule Interval
+    schedule_interval_help: How often should the backend automatically queue older posts for image dimension extraction? Requires Flarum cron setup.
+    schedule_interval_disabled: Disabled (Manual Only)
+    schedule_interval_daily: Daily
+    schedule_interval_weekly: Weekly
+    retry_mode_label: Scheduled Target Mode
+    retry_mode_help: Should the automated schedule process ALL images lacking dimensions, or ONLY images that previously failed?
+    retry_mode_all: All Images Lacking Dimensions
+    retry_mode_failed_only: Only Failed Images
+    manual_trigger_label: Manual Backfill Trigger
+    manual_trigger_help: Instantly queue background jobs to fetch dimensions for posts.
+    trigger_all_button: Queue All Missing
+    trigger_failed_button: Queue Failed Only
+    trigger_confirm_text: Are you sure you want to queue these jobs? This will run in the background.
+    trigger_success: Successfully queued {count} jobs!
