@@ -12,12 +12,10 @@
 namespace Huoxin\AutoImageDimensions\Job;
 
 use Carbon\Carbon;
-use DOMDocument;
-use DOMElement;
 use Exception;
+use FastImageSize\FastImageSize;
 use Flarum\Post\Post;
 use Flarum\Queue\AbstractJob;
-use GuzzleHttp\Client;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 
 class FetchImageDimensionsJob extends AbstractJob
@@ -73,35 +71,19 @@ class FetchImageDimensionsJob extends AbstractJob
         $xml = $post->parsed_content;
 
         $processor = new ImageXmlProcessor();
-        
-        $newXml = $processor->process($xml, function(string $src) {
+
+        $newXml = $processor->process($xml, function (string $src) {
             try {
-                $client = new Client(['timeout' => 5]);
-                // We use stream to not download the whole image if possible, but for getimagesize we need a local file or wrapper
-                // For simplicity and safety, we fetch it into a temp stream
-                $response = $client->request('GET', $src, ['stream' => true]);
+                $fastImageSize = new FastImageSize();
+                $size = $fastImageSize->getImageSize($src);
 
-                if ($response->getStatusCode() === 200) {
-                    $stream = $response->getBody();
-
-                    // Since getimagesize needs a file path or URI, and Guzzle returns a stream,
-                    // we can read a chunk and use imagecreatefromstring, or save to a temp file.
-                    // Saving to a temp file is most reliable for getimagesize.
-                    $tmpFile = tempnam(sys_get_temp_dir(), 'flarum_img_');
-                    if ($tmpFile) {
-                        file_put_contents($tmpFile, $stream->getContents());
-                        $size = @getimagesize($tmpFile);
-                        unlink($tmpFile);
-
-                        if ($size !== false) {
-                            return [(int) $size[0], (int) $size[1]];
-                        }
-                    }
+                if ($size !== false && isset($size['width']) && isset($size['height'])) {
+                    return [(int) $size['width'], (int) $size['height']];
                 }
             } catch (Exception $e) {
                 // Ignore exceptions (e.g., timeout, 404) but mark as failed
             }
-            
+
             return false;
         }, $this->forceRetry);
 
