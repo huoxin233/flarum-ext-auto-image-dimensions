@@ -35,10 +35,10 @@ class BackfillService
         $query = CommentPost::query();
 
         if ($failedOnly) {
-            $query->where('parsed_content', 'LIKE', '%data-image-dimension-failed%');
+            $query->where('content', 'LIKE', '%data-image-dimension-failed%');
         } else {
-            $query->where('parsed_content', 'LIKE', '%<IMG %')
-                ->where('parsed_content', 'NOT LIKE', '%width=%');
+            $query->where('content', 'LIKE', '%<IMG %')
+                ->where('content', 'NOT LIKE', '%width=%');
         }
 
         return $query;

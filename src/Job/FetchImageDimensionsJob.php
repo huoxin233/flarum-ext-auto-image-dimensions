@@ -54,7 +54,7 @@ class FetchImageDimensionsJob extends AbstractJob
         /** @var Post|null $post */
         $post = Post::find($this->postId);
 
-        if (!$post || !$post->parsed_content) {
+        if (!$post || !$post->content) {
             return;
         }
 
@@ -67,9 +67,9 @@ class FetchImageDimensionsJob extends AbstractJob
             }
         }
 
-        // We wrap the parsed_content in a root element so DOMDocument can parse it easily if it has multiple root elements.
+        // We wrap the content in a root element so DOMDocument can parse it easily if it has multiple root elements.
         // Flarum uses <r> or <t> as root tags.
-        $xml = $post->parsed_content;
+        $xml = $post->content;
         
         $dom = new DOMDocument();
         // Suppress warnings for invalid XML/HTML
@@ -149,11 +149,11 @@ class FetchImageDimensionsJob extends AbstractJob
 
         if ($hasChanges) {
             // Flarum s9e uses the root tag, usually we just save the whole XML back.
-            // Save parsed_content back to XML string.
+            // Save content back to XML string.
             $newXml = $dom->saveXML($dom->documentElement);
             
             // We update quietly via the query builder to avoid dispatching another Revised event
-            Post::where('id', $post->id)->update(['parsed_content' => $newXml]);
+            Post::where('id', $post->id)->update(['content' => $newXml]);
         }
     }
 }
