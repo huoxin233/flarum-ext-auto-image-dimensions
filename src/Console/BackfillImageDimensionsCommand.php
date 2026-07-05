@@ -11,17 +11,17 @@
 
 namespace Huoxin\AutoImageDimensions\Console;
 
-use Flarum\Post\CommentPost;
-use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
+use Flarum\Settings\SettingsRepositoryInterface;
+use Huoxin\AutoImageDimensions\Service\BackfillService;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Console\Scheduling\Event;
 
 class BackfillImageDimensionsCommand extends Command
 {
     /**
      * @var string
      */
-    protected $signature = 'image-dimensions:backfill {--retry-failed : Force retry of previously failed images}';
+    protected $signature = 'image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images}';
 
     /**
      * @var string
@@ -29,17 +29,24 @@ class BackfillImageDimensionsCommand extends Command
     protected $description = 'Queue old posts for image dimension extraction.';
 
     /**
-     * @var Queue
+     * @var BackfillService
      */
-    protected $queue;
+    protected $backfillService;
 
     /**
-     * @param Queue $queue
+     * @var SettingsRepositoryInterface
      */
-    public function __construct(Queue $queue)
+    protected $settings;
+
+    /**
+     * @param BackfillService $backfillService
+     * @param SettingsRepositoryInterface $settings
+     */
+    public function __construct(BackfillService $backfillService, SettingsRepositoryInterface $settings)
     {
         parent::__construct();
-        $this->queue = $queue;
+        $this->backfillService = $backfillService;
+        $this->settings = $settings;
     }
 
     public function handle()
@@ -47,13 +54,17 @@ class BackfillImageDimensionsCommand extends Command
         $this->info('Finding posts with images lacking dimensions...');
 
         $forceRetry = $this->option('retry-failed');
+        $failedOnly = $this->option('failed-only');
 
-        // Only target comment posts containing an image tag without a width attribute.
-        // This is a fast heuristic. The actual job does precise DOM parsing.
-        $query = CommentPost::where('parsed_content', 'LIKE', '%<IMG %')
-            ->where('parsed_content', 'NOT LIKE', '%width=%');
+        // If no explicit CLI flags are provided, we can optionally fall back to settings
+        // for scheduled runs. But typically scheduled runs just use the default (process all missing).
+        $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
+        if (!$forceRetry && !$failedOnly && $retryMode === 'failed_only') {
+            $failedOnly = true;
+            $forceRetry = true;
+        }
 
-        $count = $query->count();
+        $count = $this->backfillService->getCount($failedOnly);
 
         if ($count === 0) {
             $this->info('No posts found that require backfilling.');
@@ -65,18 +76,40 @@ class BackfillImageDimensionsCommand extends Command
         $bar = $this->output->createProgressBar($count);
         $bar->start();
 
-        // Process in chunks to prevent memory exhaustion
-        $query->chunk(100, function ($posts) use ($bar, $forceRetry) {
-            foreach ($posts as $post) {
-                // Pass edited_at as null to bypass race condition check for old posts
-                // Pass forceRetry from command option
-                $this->queue->push(new FetchImageDimensionsJob($post->id, null, $forceRetry));
+        $this->backfillService->process(
+            $failedOnly,
+            $forceRetry,
+            function () use ($bar) {
                 $bar->advance();
             }
-        });
+        );
 
         $bar->finish();
         $this->line('');
         $this->info('Successfully queued all jobs! Make sure your queue worker is running.');
+    }
+
+    public function isEnabled(): bool
+    {
+        $interval = $this->settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
+        return $interval !== 'disabled';
+    }
+
+    public function schedule(Event $event)
+    {
+        $interval = $this->settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
+        $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
+
+        if ($interval === 'daily') {
+            $event->daily();
+        } elseif ($interval === 'weekly') {
+            $event->weekly();
+        }
+
+        if ($retryMode === 'failed_only') {
+            // When scheduling for failed only, we must pass the options
+            // Since this is scheduling the console command, we append the options
+            $event->appendOutputTo(storage_path('logs/image-dimensions-schedule.log'));
+        }
     }
 }

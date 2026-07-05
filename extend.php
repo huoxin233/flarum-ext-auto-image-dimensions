@@ -25,4 +25,7 @@ return [
         
     (new Extend\Console())
         ->command(Console\BackfillImageDimensionsCommand::class),
+
+    (new Extend\Routes('api'))
+        ->post('/image-dimensions/backfill', 'image-dimensions.backfill', Api\Controller\TriggerBackfillController::class),
 ];
