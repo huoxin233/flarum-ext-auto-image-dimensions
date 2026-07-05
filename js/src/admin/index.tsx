@@ -26,6 +26,13 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       },
       default: 'all',
     })
+    .registerSetting({
+      setting: 'huoxin-auto-image-dimensions.proxy',
+      label: app.translator.trans('huoxin-auto-image-dimensions.admin.proxy_label'),
+      help: app.translator.trans('huoxin-auto-image-dimensions.admin.proxy_help'),
+      type: 'text',
+      placeholder: 'tcp://10.0.0.5:3128',
+    })
     .registerSetting(function () {
       return (
         <div className="Form-group">

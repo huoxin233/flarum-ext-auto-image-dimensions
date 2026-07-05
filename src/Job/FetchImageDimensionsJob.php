@@ -16,6 +16,7 @@ use Exception;
 use FastImageSize\FastImageSize;
 use Flarum\Post\Post;
 use Flarum\Queue\AbstractJob;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 
 class FetchImageDimensionsJob extends AbstractJob
@@ -72,9 +73,23 @@ class FetchImageDimensionsJob extends AbstractJob
 
         $processor = new ImageXmlProcessor();
 
-        $newXml = $processor->process($xml, function (string $src) {
+        $settings = resolve(SettingsRepositoryInterface::class);
+        $proxy = $settings->get('huoxin-auto-image-dimensions.proxy');
+
+        $newXml = $processor->process($xml, function (string $src) use ($proxy) {
             try {
                 $fastImageSize = new FastImageSize();
+
+                if ($proxy) {
+                    $fastImageSize->setStreamContextOptions([
+                        'http' => [
+                            'proxy' => $proxy,
+                            'request_fulluri' => true,
+                            'timeout' => 5.0,
+                        ],
+                    ]);
+                }
+
                 $size = $fastImageSize->getImageSize($src);
 
                 if ($size !== false && isset($size['width']) && isset($size['height'])) {

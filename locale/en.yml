@@ -15,3 +15,5 @@ huoxin-auto-image-dimensions:
     trigger_failed_button: Queue Failed Only
     trigger_confirm_text: Are you sure you want to queue these jobs? This will run in the background.
     trigger_success: Successfully queued {count} jobs!
+    proxy_label: HTTP Proxy (SSRF Protection)
+    proxy_help: "Route backend image dimension requests through an internal proxy to mask your server's true IP (e.g. tcp://10.0.0.5:3128). Leave blank to disable."
