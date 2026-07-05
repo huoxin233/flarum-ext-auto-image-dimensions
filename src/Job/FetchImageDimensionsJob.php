@@ -54,7 +54,7 @@ class FetchImageDimensionsJob extends AbstractJob
         /** @var Post|null $post */
         $post = Post::find($this->postId);
 
-        if (!$post || !$post->content) {
+        if (! $post || ! $post->parsed_content) {
             return;
         }
 
@@ -69,17 +69,17 @@ class FetchImageDimensionsJob extends AbstractJob
 
         // We wrap the content in a root element so DOMDocument can parse it easily if it has multiple root elements.
         // Flarum uses <r> or <t> as root tags.
-        $xml = $post->content;
-        
+        $xml = $post->parsed_content;
+
         $dom = new DOMDocument();
         // Suppress warnings for invalid XML/HTML
         $internalErrors = libxml_use_internal_errors(true);
-        // Load the XML. We add an XML declaration to ensure UTF-8 handling if needed,
-        // though Flarum's parsed content is usually simple XML.
-        $success = $dom->loadXML($xml);
+        // Load the XML. We add an XML declaration to ensure UTF-8 handling and strict parsing.
+        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$xml);
+
         libxml_use_internal_errors($internalErrors);
 
-        if (!$success) {
+        if (! $success) {
             return;
         }
 
@@ -88,19 +88,19 @@ class FetchImageDimensionsJob extends AbstractJob
 
         foreach ($images as $img) {
             /** @var DOMElement $img */
-            
+
             // Check if it already has dimensions
             if ($img->hasAttribute('width') && $img->hasAttribute('height')) {
                 continue;
             }
 
             $src = $img->getAttribute('src');
-            if (!$src) {
+            if (! $src) {
                 continue;
             }
 
             // Skip if it previously failed, unless we are forcing a retry
-            if ($img->hasAttribute('data-image-dimension-failed') && !$this->forceRetry) {
+            if ($img->hasAttribute('data-image-dimension-failed') && ! $this->forceRetry) {
                 continue;
             }
 
@@ -110,10 +110,10 @@ class FetchImageDimensionsJob extends AbstractJob
                 // We use stream to not download the whole image if possible, but for getimagesize we need a local file or wrapper
                 // For simplicity and safety, we fetch it into a temp stream
                 $response = $client->request('GET', $src, ['stream' => true]);
-                
+
                 if ($response->getStatusCode() === 200) {
                     $stream = $response->getBody();
-                    
+
                     // Since getimagesize needs a file path or URI, and Guzzle returns a stream,
                     // we can read a chunk and use imagecreatefromstring, or save to a temp file.
                     // Saving to a temp file is most reliable for getimagesize.
@@ -124,8 +124,8 @@ class FetchImageDimensionsJob extends AbstractJob
                         unlink($tmpFile);
 
                         if ($size !== false) {
-                            $img->setAttribute('width', (string)$size[0]);
-                            $img->setAttribute('height', (string)$size[1]);
+                            $img->setAttribute('width', (string) $size[0]);
+                            $img->setAttribute('height', (string) $size[1]);
                             $img->removeAttribute('data-image-dimension-failed');
                             $hasChanges = true;
                         } else {
@@ -148,11 +148,7 @@ class FetchImageDimensionsJob extends AbstractJob
         }
 
         if ($hasChanges) {
-            // Flarum s9e uses the root tag, usually we just save the whole XML back.
-            // Save content back to XML string.
             $newXml = $dom->saveXML($dom->documentElement);
-            
-            // We update quietly via the query builder to avoid dispatching another Revised event
             Post::where('id', $post->id)->update(['content' => $newXml]);
         }
     }
