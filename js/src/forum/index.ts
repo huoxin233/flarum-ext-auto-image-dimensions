@@ -16,7 +16,7 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
     // Find all images in this post
     const element = this.element as HTMLElement;
-    const images = element.querySelectorAll('img');
+    const images = element.querySelectorAll('.Post-body img');
 
     let batchedImages: { url: string; width: number; height: number }[] = [];
     let debounceTimer: any = null;
