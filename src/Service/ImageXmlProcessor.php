@@ -20,7 +20,7 @@ class ImageXmlProcessor
      * Process an XML string to inject image dimensions.
      *
      * @param string $xml The raw XML string from the database.
-     * @param callable $fetchDimensions A callable that takes a string $src and returns [width, height] or false.
+     * @param callable $fetchDimensions A callable that takes a string $src and returns [width, height], false (failed), or null (skip).
      * @param bool $forceRetry Whether to retry previously failed images.
      * @return string|false The modified XML string, or false if no changes were made/parsing failed.
      */
@@ -87,6 +87,10 @@ class ImageXmlProcessor
 
             // Fetch dimensions using the provided callable
             $size = call_user_func($fetchDimensions, $src);
+            
+            if ($size === null) {
+                continue;
+            }
 
             if ($size !== false) {
                 $realWidth = $size[0];

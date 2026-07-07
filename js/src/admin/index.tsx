@@ -4,6 +4,18 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
   app.extensionData
     .for('huoxin-auto-image-dimensions')
     .registerSetting({
+      setting: 'huoxin-auto-image-dimensions.operating_mode',
+      label: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_label'),
+      help: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_help'),
+      type: 'select',
+      options: {
+        backend: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_backend'),
+        client: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_client'),
+        hybrid: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_hybrid'),
+      },
+      default: 'backend',
+    })
+    .registerSetting({
       setting: 'huoxin-auto-image-dimensions.schedule_interval',
       label: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_label'),
       help: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_help'),

@@ -14,9 +14,10 @@ namespace Huoxin\AutoImageDimensions\Listener;
 use Flarum\Post\Event\Posted;
 use Flarum\Post\Event\Revised;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Contracts\Queue\Queue;
 use Carbon\Carbon;
+use Flarum\Settings\SettingsRepositoryInterface;
+use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Contracts\Events\Dispatcher;
 
 class QueueImageDimensionsFetch
 {
@@ -24,13 +25,20 @@ class QueueImageDimensionsFetch
      * @var Queue
      */
     protected $queue;
+    
+    /**
+     * @var SettingsRepositoryInterface
+     */
+    protected $settings;
 
     /**
      * @param Queue $queue
+     * @param SettingsRepositoryInterface $settings
      */
-    public function __construct(Queue $queue)
+    public function __construct(Queue $queue, SettingsRepositoryInterface $settings)
     {
         $this->queue = $queue;
+        $this->settings = $settings;
     }
 
     /**
@@ -64,6 +72,11 @@ class QueueImageDimensionsFetch
      */
     protected function dispatchJob(int $postId, ?Carbon $editedAt)
     {
+        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'backend');
+        if ($mode === 'client') {
+            return;
+        }
+
         $this->queue->push(
             new FetchImageDimensionsJob($postId, $editedAt ? $editedAt->toIso8601String() : null)
         );

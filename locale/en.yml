@@ -1,5 +1,10 @@
 huoxin-auto-image-dimensions:
   admin:
+    operating_mode_label: Operating Mode
+    operating_mode_help: Choose how image dimensions are fetched. Hybrid is recommended.
+    operating_mode_backend: Backend Queue Only (Server fetches images)
+    operating_mode_client: Pure Client-Side Only (Browser fetches images)
+    operating_mode_hybrid: True Hybrid (Backend primary, Client-Side fallback)
     schedule_interval_label: Schedule Interval
     schedule_interval_help: How often should the backend automatically queue older posts for image dimension extraction? Requires Flarum cron setup.
     schedule_interval_disabled: Disabled (Manual Only)
