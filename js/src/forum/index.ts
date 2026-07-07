@@ -10,7 +10,7 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
     const post = this.attrs.post;
     if (!post) return;
-    
+
     const postId = post.id();
     if (!postId) return;
 
@@ -29,16 +29,18 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       const payload = batchedImages.slice(0, 100);
       batchedImages = [];
 
-      app.request({
-        method: 'POST',
-        url: app.forum.attribute('apiUrl') + '/auto-image-dimensions/report',
-        body: {
-          post_id: postId,
-          images: payload,
-        },
-      }).catch((e) => {
-        console.error('Failed to report image dimensions batch', e);
-      });
+      app
+        .request({
+          method: 'POST',
+          url: app.forum.attribute('apiUrl') + '/auto-image-dimensions/report',
+          body: {
+            post_id: postId,
+            images: payload,
+          },
+        })
+        .catch((e) => {
+          console.error('Failed to report image dimensions batch', e);
+        });
     };
 
     images.forEach((img: HTMLImageElement) => {

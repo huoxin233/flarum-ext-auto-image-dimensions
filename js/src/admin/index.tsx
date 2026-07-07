@@ -49,20 +49,12 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       return (
         <div className="Form-group">
           <label>{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_label')}</label>
-          <div className="helpText">
-            {app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_help')}
-          </div>
+          <div className="helpText">{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_help')}</div>
           <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button
-              className="Button Button--primary"
-              onclick={() => triggerBackfill('all')}
-            >
+            <button className="Button Button--primary" onclick={() => triggerBackfill('all')}>
               {app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_all_button')}
             </button>
-            <button
-              className="Button Button--warning"
-              onclick={() => triggerBackfill('failed_only')}
-            >
+            <button className="Button Button--warning" onclick={() => triggerBackfill('failed_only')}>
               {app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_failed_button')}
             </button>
           </div>
@@ -72,7 +64,7 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
   function triggerBackfill(mode: string) {
     if (!confirm(app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_confirm_text')[0])) {
-        return;
+      return;
     }
 
     app
@@ -82,17 +74,11 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
         body: { retry_mode: mode },
       })
       .then((response: any) => {
-        app.alerts.show(
-          { type: 'success' },
-          app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_success', { count: response.queued })
-        );
+        app.alerts.show({ type: 'success' }, app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_success', { count: response.queued }));
       })
       .catch((error) => {
         console.error(error);
-        app.alerts.show(
-          { type: 'error' },
-          'An error occurred while triggering the backfill.'
-        );
+        app.alerts.show({ type: 'error' }, 'An error occurred while triggering the backfill.');
       });
   }
 });
