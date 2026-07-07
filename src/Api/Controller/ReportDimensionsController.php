@@ -33,9 +33,12 @@ class ReportDimensionsController implements RequestHandlerInterface
     {
         $actor = RequestUtil::getActor($request);
         
+        if ($actor->isGuest()) {
+            return new EmptyResponse(403);
+        }
+        
         // Validation D: Rate Limiting
-        $ip = Arr::get($request->getServerParams(), 'REMOTE_ADDR', '127.0.0.1');
-        $rlKey = 'auto_img_dim.rl.' . ($actor->isGuest() ? 'ip_' . $ip : $actor->id);
+        $rlKey = 'auto_img_dim.rl.' . $actor->id;
         $count = (int) $this->cache->get($rlKey, 0);
         if ($count >= self::RATE_LIMIT_MAX) {
             return new JsonResponse(['errors' => [['code' => 'rate_limited']]], 429);

@@ -5,6 +5,9 @@ import CommentPost from 'flarum/forum/components/CommentPost';
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   // We extend oncreate to run whenever a post is rendered in the DOM
   extend(CommentPost.prototype, 'oncreate', function (this: any, vnode: any) {
+    // Only allow logged-in users to report dimensions
+    if (!app.session || !app.session.user) return;
+
     const post = this.attrs.post;
     if (!post) return;
     
