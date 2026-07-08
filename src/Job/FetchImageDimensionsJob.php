@@ -102,10 +102,13 @@ class FetchImageDimensionsJob extends AbstractJob
         }, $this->forceRetry, $maxHeight);
 
         if ($newXml !== false) {
-            $originalContent = $post->getOriginal('content') ?? $post->parsed_content;
-            Post::where('id', $post->id)
-                ->where('content', $originalContent)
-                ->update(['content' => $newXml]);
+            $query = Post::where('id', $post->id);
+            if ($post->edited_at) {
+                $query->where('edited_at', $post->edited_at);
+            } else {
+                $query->whereNull('edited_at');
+            }
+            $query->update(['content' => $newXml]);
         }
     }
 }

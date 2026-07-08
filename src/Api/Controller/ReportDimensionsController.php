@@ -104,12 +104,15 @@ class ReportDimensionsController implements RequestHandlerInterface
         }, true, $maxHeight);
 
         if ($newXml !== false) {
-            // Update XML directly to avoid Revised events looping
-            // Optimistic locking (content = original) prevents overwriting concurrent user edits
-            $originalContent = $post->getOriginal('content') ?? $post->parsed_content;
-            Post::where('id', $post->id)
-                ->where('content', $originalContent)
-                ->update(['content' => $newXml]);
+            // Optimistic locking via edited_at prevents overwriting concurrent user edits.
+            // We use edited_at instead of content to avoid MySQL TEXT collation mismatch bugs.
+            $query = Post::where('id', $post->id);
+            if ($post->edited_at) {
+                $query->where('edited_at', $post->edited_at);
+            } else {
+                $query->whereNull('edited_at');
+            }
+            $query->update(['content' => $newXml]);
         }
 
         return new EmptyResponse(204);
