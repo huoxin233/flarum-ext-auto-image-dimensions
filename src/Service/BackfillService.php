@@ -37,8 +37,7 @@ class BackfillService
         if ($failedOnly) {
             $query->where('content', 'LIKE', '%data-image-dimension-failed%');
         } else {
-            $query->where('content', 'LIKE', '%<IMG %')
-                ->where('content', 'NOT LIKE', '%width=%');
+            $query->where('content', 'LIKE', '%<IMG %');
         }
 
         return $query;
