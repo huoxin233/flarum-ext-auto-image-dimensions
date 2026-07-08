@@ -2,13 +2,15 @@ import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import CommentPost from 'flarum/forum/components/CommentPost';
 import PostControls from 'flarum/forum/utils/PostControls';
+import ItemList from 'flarum/common/utils/ItemList';
 import Button from 'flarum/common/components/Button';
 import Model from 'flarum/common/Model';
 import Post from 'flarum/common/models/Post';
+import type Mithril from 'mithril';
 
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   // We extend oncreate to run whenever a post is rendered in the DOM
-  extend(CommentPost.prototype, 'oncreate', function (this: any, vnode: any) {
+  extend(CommentPost.prototype, 'oncreate', function (this: CommentPost, val: void, vnode: Mithril.VnodeDOM<any, CommentPost>) {
     // Only allow logged-in users to report dimensions
     if (!app.session || !app.session.user) return;
 
@@ -20,10 +22,10 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
     // Find all images in this post
     const element = this.element as HTMLElement;
-    const images = element.querySelectorAll('.Post-body img');
+    const images = element.querySelectorAll<HTMLImageElement>('.Post-body img');
 
     let batchedImages: { url: string; width: number; height: number }[] = [];
-    let debounceTimer: any = null;
+    let debounceTimer: number | null = null;
 
     const flushBatch = () => {
       if (batchedImages.length === 0) return;
@@ -36,13 +38,13 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       app
         .request({
           method: 'POST',
-          url: app.forum.attribute('apiUrl') + '/auto-image-dimensions/report',
+          url: app.forum.attribute<string>('apiUrl') + '/auto-image-dimensions/report',
           body: {
             post_id: postId,
             images: payload,
           },
         })
-        .catch((e) => {
+        .catch((e: unknown) => {
           console.error('Failed to report image dimensions batch', e);
         });
     };
@@ -75,7 +77,7 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
           // Debounce the flush
           if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(flushBatch, 500);
+          debounceTimer = window.setTimeout(flushBatch, 500);
         }
       };
 
@@ -89,19 +91,21 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
   Post.prototype.canRefreshImageDimensions = Model.attribute<boolean>('canRefreshImageDimensions');
 
-  extend(PostControls, 'moderationControls', function (items, post) {
+  extend(PostControls, 'moderationControls', function (items: ItemList<Mithril.Children>, post: Post) {
     if (post.canRefreshImageDimensions()) {
       items.add(
         'refreshImageDimensions',
         <Button
           icon="fas fa-sync"
           onclick={() => {
-            app.request({
-              method: 'POST',
-              url: app.forum.attribute('apiUrl') + `/posts/${post.id()}/refresh-image-dimensions`,
-            }).then(() => {
-              app.alerts.show({ type: 'success' }, app.translator.trans('huoxin-auto-image-dimensions.forum.alerts.refresh_success'));
-            });
+            app
+              .request({
+                method: 'POST',
+                url: app.forum.attribute<string>('apiUrl') + `/posts/${post.id()}/refresh-image-dimensions`,
+              })
+              .then(() => {
+                app.alerts.show({ type: 'success' }, app.translator.trans('huoxin-auto-image-dimensions.forum.alerts.refresh_success'));
+              });
           }}
         >
           {app.translator.trans('huoxin-auto-image-dimensions.forum.post_controls.refresh_button')}

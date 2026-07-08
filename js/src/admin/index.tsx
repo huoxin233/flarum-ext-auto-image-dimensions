@@ -1,4 +1,5 @@
 import app from 'flarum/admin/app';
+import extractText from 'flarum/common/utils/extractText';
 
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   app.extensionData
@@ -73,20 +74,20 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
     );
 
   function triggerBackfill(mode: string) {
-    if (!confirm(app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_confirm_text')[0])) {
+    if (!confirm(extractText(app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_confirm_text')))) {
       return;
     }
 
     app
-      .request({
+      .request<{ queued: number }>({
         method: 'POST',
-        url: app.forum.attribute('apiUrl') + '/image-dimensions/backfill',
+        url: app.forum.attribute<string>('apiUrl') + '/image-dimensions/backfill',
         body: { retry_mode: mode },
       })
-      .then((response: any) => {
+      .then((response: { queued: number }) => {
         app.alerts.show({ type: 'success' }, app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_success', { count: response.queued }));
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error(error);
         app.alerts.show({ type: 'error' }, 'An error occurred while triggering the backfill.');
       });
