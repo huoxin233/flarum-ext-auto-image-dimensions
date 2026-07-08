@@ -14,7 +14,6 @@ namespace Huoxin\AutoImageDimensions\Console;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Service\BackfillService;
 use Illuminate\Console\Command;
-use Illuminate\Console\Scheduling\Event;
 
 class BackfillImageDimensionsCommand extends Command
 {
@@ -59,7 +58,7 @@ class BackfillImageDimensionsCommand extends Command
         // If no explicit CLI flags are provided, we can optionally fall back to settings
         // for scheduled runs. But typically scheduled runs just use the default (process all missing).
         $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
-        if (!$forceRetry && !$failedOnly && $retryMode === 'failed_only') {
+        if (! $forceRetry && ! $failedOnly && $retryMode === 'failed_only') {
             $failedOnly = true;
             $forceRetry = true;
         }
@@ -87,29 +86,5 @@ class BackfillImageDimensionsCommand extends Command
         $bar->finish();
         $this->line('');
         $this->info('Successfully queued all jobs! Make sure your queue worker is running.');
-    }
-
-    public function isEnabled(): bool
-    {
-        $interval = $this->settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
-        return $interval !== 'disabled';
-    }
-
-    public function schedule(Event $event)
-    {
-        $interval = $this->settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
-        $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
-
-        if ($interval === 'daily') {
-            $event->daily();
-        } elseif ($interval === 'weekly') {
-            $event->weekly();
-        }
-
-        if ($retryMode === 'failed_only') {
-            // When scheduling for failed only, we must pass the options
-            // Since this is scheduling the console command, we append the options
-            $event->appendOutputTo(storage_path('logs/image-dimensions-schedule.log'));
-        }
     }
 }

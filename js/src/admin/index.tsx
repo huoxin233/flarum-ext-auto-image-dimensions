@@ -24,6 +24,7 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
         disabled: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_disabled'),
         daily: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_daily'),
         weekly: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_weekly'),
+        monthly: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_monthly'),
       },
       default: 'disabled',
     })

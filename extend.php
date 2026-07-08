@@ -12,6 +12,8 @@
 namespace Huoxin\AutoImageDimensions;
 
 use Flarum\Extend;
+use Flarum\Settings\SettingsRepositoryInterface;
+use Illuminate\Console\Scheduling\Event;
 use s9e\TextFormatter\Configurator;
 use s9e\TextFormatter\Configurator\TemplateNormalizations\SetAttributeOnElements;
 
@@ -27,7 +29,26 @@ return [
         ->subscribe(Listener\QueueImageDimensionsFetch::class),
 
     (new Extend\Console())
-        ->command(Console\BackfillImageDimensionsCommand::class),
+        ->command(Console\BackfillImageDimensionsCommand::class)
+        ->schedule('image-dimensions:backfill', function (Event $event) {
+            $settings = resolve(SettingsRepositoryInterface::class);
+            $interval = $settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
+            $retryMode = $settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
+
+            if ($interval === 'daily') {
+                $event->daily();
+            } elseif ($interval === 'weekly') {
+                $event->weekly();
+            } elseif ($interval === 'monthly') {
+                $event->monthly();
+            } else {
+                return; // Not scheduled
+            }
+
+            if ($retryMode === 'failed_only') {
+                $event->appendOutputTo(storage_path('logs/image-dimensions-schedule.log'));
+            }
+        }),
 
     (new Extend\Routes('api'))
         ->post('/image-dimensions/backfill', 'image-dimensions.backfill', Api\Controller\TriggerBackfillController::class)

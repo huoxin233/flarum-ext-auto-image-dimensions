@@ -10,6 +10,7 @@ huoxin-auto-image-dimensions:
     schedule_interval_disabled: Disabled (Manual Only)
     schedule_interval_daily: Daily
     schedule_interval_weekly: Weekly
+    schedule_interval_monthly: Monthly
     retry_mode_label: Scheduled Target Mode
     retry_mode_help: Should the automated schedule process ALL images lacking dimensions, or ONLY images that previously failed?
     retry_mode_all: All Images Lacking Dimensions
