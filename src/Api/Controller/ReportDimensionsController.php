@@ -16,7 +16,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 class ReportDimensionsController implements RequestHandlerInterface
 {
     private const MAX_DIM = 16384;
-    private const MAX_RATIO = 20.0;
     private const RATE_LIMIT_WINDOW = 60;
     private const RATE_LIMIT_MAX = 60;
 
@@ -65,11 +64,6 @@ class ReportDimensionsController implements RequestHandlerInterface
             $height = (int) Arr::get($img, 'height', 0);
 
             if ($url === '' || $width < 1 || $width > self::MAX_DIM || $height < 1 || $height > self::MAX_DIM) {
-                continue;
-            }
-
-            $ratio = $width / $height;
-            if ($ratio > self::MAX_RATIO || $ratio < (1 / self::MAX_RATIO)) {
                 continue;
             }
 
