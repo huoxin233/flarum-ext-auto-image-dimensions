@@ -101,7 +101,11 @@ class ReportDimensionsController implements RequestHandlerInterface
 
         if ($newXml !== false) {
             // Update XML directly to avoid Revised events looping
-            Post::where('id', $post->id)->update(['content' => $newXml]);
+            // Optimistic locking (content = original) prevents overwriting concurrent user edits
+            $originalContent = $post->getOriginal('content') ?? $post->parsed_content;
+            Post::where('id', $post->id)
+                ->where('content', $originalContent)
+                ->update(['content' => $newXml]);
         }
 
         return new EmptyResponse(204);
