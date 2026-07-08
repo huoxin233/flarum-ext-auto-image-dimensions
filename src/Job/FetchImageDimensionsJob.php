@@ -73,6 +73,7 @@ class FetchImageDimensionsJob extends AbstractJob
 
         $settings = resolve(SettingsRepositoryInterface::class);
         $proxy = $settings->get('huoxin-auto-image-dimensions.proxy');
+        $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
 
         $newXml = $processor->process($xml, function (string $src) use ($proxy) {
             try {
@@ -98,7 +99,7 @@ class FetchImageDimensionsJob extends AbstractJob
             }
 
             return false;
-        }, $this->forceRetry);
+        }, $this->forceRetry, $maxHeight);
 
         if ($newXml !== false) {
             $originalContent = $post->getOriginal('content') ?? $post->parsed_content;

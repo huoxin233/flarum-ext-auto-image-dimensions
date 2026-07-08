@@ -12,6 +12,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Flarum\Settings\SettingsRepositoryInterface;
 
 class ReportDimensionsController implements RequestHandlerInterface
 {
@@ -85,6 +86,9 @@ class ReportDimensionsController implements RequestHandlerInterface
         }
 
         // Inject dimensions (ImageXmlProcessor auto-skips if dimensions exist)
+        $settings = resolve(SettingsRepositoryInterface::class);
+        $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
+
         $newXml = $this->processor->process($post->parsed_content, function (string $src) use ($imageMap) {
             // Exact match (absolute URLs)
             if (isset($imageMap[$src])) {
@@ -97,7 +101,7 @@ class ReportDimensionsController implements RequestHandlerInterface
                 }
             }
             return null;
-        }, true);
+        }, true, $maxHeight);
 
         if ($newXml !== false) {
             // Update XML directly to avoid Revised events looping

@@ -22,9 +22,10 @@ class ImageXmlProcessor
      * @param string $xml The raw XML string from the database.
      * @param callable $fetchDimensions A callable that takes a string $src and returns [width, height], false (failed), or null (skip).
      * @param bool $forceRetry Whether to retry previously failed images.
+     * @param int $maxHeight The maximum height to allow for images. If 0, no limit is applied.
      * @return string|false The modified XML string, or false if no changes were made/parsing failed.
      */
-    public function process(string $xml, callable $fetchDimensions, bool $forceRetry = false)
+    public function process(string $xml, callable $fetchDimensions, bool $forceRetry = false, int $maxHeight = 400)
     {
         $dom = new DOMDocument();
         // Suppress warnings for invalid XML/HTML
@@ -95,14 +96,31 @@ class ImageXmlProcessor
                 if ($hasUserWidth && ! $hasUserHeight) {
                     if ($realWidth > 0) {
                         $calcHeight = round($userWidthVal * ($realHeight / $realWidth));
-                        $img->setAttribute('height', (string) $calcHeight);
+                        if ($maxHeight > 0 && $calcHeight > $maxHeight) {
+                            $calcWidth = round($userWidthVal * ($maxHeight / $calcHeight));
+                            $img->setAttribute('width', (string) $calcWidth);
+                            $img->setAttribute('height', (string) $maxHeight);
+                        } else {
+                            $img->setAttribute('height', (string) $calcHeight);
+                        }
                     }
                 } elseif ($hasUserHeight && ! $hasUserWidth) {
                     if ($realHeight > 0) {
                         $calcWidth = round($userHeightVal * ($realWidth / $realHeight));
-                        $img->setAttribute('width', (string) $calcWidth);
+                        $actualHeight = $userHeightVal;
+                        if ($maxHeight > 0 && $actualHeight > $maxHeight) {
+                            $calcWidth = round($calcWidth * ($maxHeight / $actualHeight));
+                            $img->setAttribute('width', (string) $calcWidth);
+                            $img->setAttribute('height', (string) $maxHeight);
+                        } else {
+                            $img->setAttribute('width', (string) $calcWidth);
+                        }
                     }
                 } else {
+                    if ($maxHeight > 0 && $realHeight > $maxHeight) {
+                        $realWidth = round($realWidth * ($maxHeight / $realHeight));
+                        $realHeight = $maxHeight;
+                    }
                     $img->setAttribute('width', (string) $realWidth);
                     $img->setAttribute('height', (string) $realHeight);
                 }

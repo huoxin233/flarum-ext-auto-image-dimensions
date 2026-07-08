@@ -27,7 +27,8 @@ return [
     new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Settings())
-        ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client'),
+        ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client')
+        ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', null, 400),
 
     (new Extend\Event())
         ->subscribe(Listener\QueueImageDimensionsFetch::class),

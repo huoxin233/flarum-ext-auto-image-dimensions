@@ -24,6 +24,13 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
               },
               default: 'client',
             })}
+            {this.buildSettingComponent({
+              setting: 'huoxin-auto-image-dimensions.max_height',
+              label: app.translator.trans('huoxin-auto-image-dimensions.admin.max_height_label'),
+              help: app.translator.trans('huoxin-auto-image-dimensions.admin.max_height_help'),
+              type: 'number',
+              default: 400,
+            })}
 
             {!isClient && (
               <>
