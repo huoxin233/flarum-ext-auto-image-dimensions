@@ -71,6 +71,13 @@ class ImageXmlProcessor
             }
 
             if ($hasUserWidth && $hasUserHeight) {
+                if ($maxHeight > 0 && $userHeightVal > $maxHeight) {
+                    $calcWidth = round($userWidthVal * ($maxHeight / $userHeightVal));
+                    $img->setAttribute('width', (string) $calcWidth);
+                    $img->setAttribute('height', (string) $maxHeight);
+                    $img->removeAttribute('data-image-dimension-failed');
+                    $hasChanges = true;
+                }
                 continue;
             }
 
