@@ -1,6 +1,6 @@
 {
     "name": "huoxin/auto-image-dimensions",
-    "description": "auto image dimensions",
+    "description": "Automatically fetches and applies width and height dimensions to Flarum image tags to prevent layout shift (CLS).",
     "keywords": [
         "flarum"
     ],
@@ -25,11 +25,11 @@
     "extra": {
         "flarum-extension": {
             "title": "Auto Image Dimensions",
-            "category": "",
+            "category": "feature",
             "icon": {
-                "name": "",
-                "color": "",
-                "backgroundColor": ""
+                "name": "fas fa-image",
+                "color": "#ffffff",
+                "backgroundColor": "#9A2424"
             }
         },
         "flarum-cli": {
