@@ -63,7 +63,6 @@ return [
 
     (new Extend\Formatter())
         ->configure(function (Configurator $configurator) {
-            // Adds attributes to the compiled XSLT template for <img> tags
             $configurator->templateNormalizer->add(
                 new SetAttributeOnElements('//img[not(@height)]', 'height', '{@height}')
             );
@@ -71,7 +70,6 @@ return [
                 new SetAttributeOnElements('//img[not(@width)]', 'width', '{@width}')
             );
 
-            // Re-normalize the IMG BBCode template if it exists
             if ($configurator->BBCodes->collection->exists('IMG')) {
                 $configurator->BBCodes->addFromRepository('IMG');
             }

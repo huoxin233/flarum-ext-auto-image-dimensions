@@ -37,6 +37,7 @@ class BackfillService
         if ($failedOnly) {
             $query->where('content', 'LIKE', '%data-image-dimension-failed%');
         } else {
+            // We only look for IMG tags. ImageXmlProcessor handles deduplication.
             $query->where('content', 'LIKE', '%<IMG %');
         }
 

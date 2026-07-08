@@ -32,13 +32,13 @@ class ReportDimensionsController implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
-        
+
         if ($actor->isGuest()) {
             return new EmptyResponse(403);
         }
-        
-        // Validation D: Rate Limiting
-        $rlKey = 'auto_img_dim.rl.' . $actor->id;
+
+        // Rate Limiting
+        $rlKey = 'auto_img_dim.rl.'.$actor->id;
         $count = (int) $this->cache->get($rlKey, 0);
         if ($count >= self::RATE_LIMIT_MAX) {
             return new JsonResponse(['errors' => [['code' => 'rate_limited']]], 429);
@@ -49,16 +49,15 @@ class ReportDimensionsController implements RequestHandlerInterface
         $postId = (int) Arr::get($body, 'post_id', 0);
         $images = Arr::get($body, 'images', []);
 
-        if (!$postId || !is_array($images) || empty($images)) {
+        if (! $postId || ! is_array($images) || empty($images)) {
             return new JsonResponse(['errors' => [['code' => 'invalid_payload']]], 422);
         }
 
-        // DoS Protection: Cap batch size at 100 images per request
+        // Cap batch size
         if (count($images) > 100) {
             return new JsonResponse(['errors' => [['code' => 'payload_too_large']]], 413);
         }
 
-        // Build a lookup map and validate bounds
         $imageMap = [];
         foreach ($images as $img) {
             $url = (string) Arr::get($img, 'url', '');
@@ -66,12 +65,12 @@ class ReportDimensionsController implements RequestHandlerInterface
             $height = (int) Arr::get($img, 'height', 0);
 
             if ($url === '' || $width < 1 || $width > self::MAX_DIM || $height < 1 || $height > self::MAX_DIM) {
-                continue; // Skip invalid entries in the batch
+                continue;
             }
 
             $ratio = $width / $height;
             if ($ratio > self::MAX_RATIO || $ratio < (1 / self::MAX_RATIO)) {
-                continue; // Skip stretched entries
+                continue;
             }
 
             $imageMap[$url] = [$width, $height];
@@ -83,33 +82,28 @@ class ReportDimensionsController implements RequestHandlerInterface
 
         /** @var Post|null $post */
         $post = Post::find($postId);
-        if (!$post || !$post->parsed_content) {
+        if (! $post || ! $post->parsed_content) {
             return new EmptyResponse(204);
         }
 
-        // Validation: Can the user actually see this post?
         if ($actor->cannot('view', $post)) {
             return new EmptyResponse(403);
         }
 
-        // Validation A & B are inherently handled by our ImageXmlProcessor.
-        // We configure the processor to inject the specific dimensions if the URL matches.
-        // The processor automatically skips if dimensions already exist.
-        $newXml = $this->processor->process($post->parsed_content, function(string $src) use ($imageMap) {
+        // Inject dimensions (ImageXmlProcessor auto-skips if dimensions exist)
+        $newXml = $this->processor->process($post->parsed_content, function (string $src) use ($imageMap) {
             // Exact match (absolute URLs)
             if (isset($imageMap[$src])) {
                 return $imageMap[$src];
             }
-            
             // Fallback for relative URLs stored in XML (browser always reports absolute URLs)
             foreach ($imageMap as $reportedUrl => $dims) {
                 if (str_ends_with($reportedUrl, $src)) {
                     return $dims;
                 }
             }
-            
             return null;
-        }, true); // forceRetry = true, so it updates even if data-image-dimension-failed="1" is present
+        }, true);
 
         if ($newXml !== false) {
             // Update XML directly to avoid Revised events looping

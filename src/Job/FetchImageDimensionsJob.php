@@ -58,8 +58,7 @@ class FetchImageDimensionsJob extends AbstractJob
             return;
         }
 
-        // Race condition prevention
-        // If the post was edited after this job was queued, we abort.
+        // Abort if post was edited after job was queued
         if ($this->editedAt !== null && $post->edited_at !== null) {
             $jobEditedAt = Carbon::parse($this->editedAt);
             if ($post->edited_at->gt($jobEditedAt)) {
@@ -67,8 +66,7 @@ class FetchImageDimensionsJob extends AbstractJob
             }
         }
 
-        // We wrap the content in a root element so DOMDocument can parse it easily if it has multiple root elements.
-        // Flarum uses <r> or <t> as root tags.
+        // DOMDocument requires a single root node (Flarum uses <r> or <t>)
         $xml = $post->parsed_content;
 
         $processor = new ImageXmlProcessor();

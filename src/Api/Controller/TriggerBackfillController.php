@@ -42,7 +42,7 @@ class TriggerBackfillController implements RequestHandlerInterface
         $retryMode = Arr::get($body, 'retry_mode', 'all');
 
         $failedOnly = $retryMode === 'failed_only';
-        // Admin manual trigger implies force retry is always true so that we can retry failed images
+
         $forceRetry = true; 
 
         $count = $this->backfillService->getCount($failedOnly);

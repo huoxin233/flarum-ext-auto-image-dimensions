@@ -55,8 +55,7 @@ class BackfillImageDimensionsCommand extends Command
         $forceRetry = $this->option('retry-failed');
         $failedOnly = $this->option('failed-only');
 
-        // If no explicit CLI flags are provided, we can optionally fall back to settings
-        // for scheduled runs. But typically scheduled runs just use the default (process all missing).
+        // Fallback to settings if no CLI flags provided
         $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
         if (! $forceRetry && ! $failedOnly && $retryMode === 'failed_only') {
             $failedOnly = true;

@@ -29,12 +29,12 @@ class ImageXmlProcessor
         $dom = new DOMDocument();
         // Suppress warnings for invalid XML/HTML
         $internalErrors = libxml_use_internal_errors(true);
-        // Load the XML. We add an XML declaration to ensure UTF-8 handling and strict parsing.
-        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>' . $xml);
-        
+        // Ensure UTF-8 parsing
+        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$xml);
+
         libxml_use_internal_errors($internalErrors);
 
-        if (!$success) {
+        if (! $success) {
             return false;
         }
 
@@ -43,26 +43,25 @@ class ImageXmlProcessor
 
         foreach ($images as $img) {
             /** @var DOMElement $img */
-            
+
             $hasUserWidth = $img->hasAttribute('width');
             $hasUserHeight = $img->hasAttribute('height');
-            
+
             $userWidthVal = $hasUserWidth ? (float) $img->getAttribute('width') : 0;
             $userHeightVal = $hasUserHeight ? (float) $img->getAttribute('height') : 0;
 
-            // Flarum's BBCode parser can drop 'width' or 'height' if they aren't provided in strict pairs.
-            // We extract them manually from the raw <s> tag markdown to ensure we respect user intent.
-            if (!$hasUserWidth || !$hasUserHeight) {
+            // Extract manually from <s> tag markdown to recover dropped width/height attributes
+            if (! $hasUserWidth || ! $hasUserHeight) {
                 $sTags = $img->getElementsByTagName('s');
                 if ($sTags->length > 0) {
                     $rawText = $sTags->item(0)->nodeValue;
-                    
-                    if (!$hasUserWidth && preg_match('/width=[\'"]?(\d+)/i', $rawText, $wMatch)) {
+
+                    if (! $hasUserWidth && preg_match('/width=[\'"]?(\d+)/i', $rawText, $wMatch)) {
                         $hasUserWidth = true;
                         $userWidthVal = (float) $wMatch[1];
                         $img->setAttribute('width', (string) $userWidthVal);
                     }
-                    if (!$hasUserHeight && preg_match('/height=[\'"]?(\d+)/i', $rawText, $hMatch)) {
+                    if (! $hasUserHeight && preg_match('/height=[\'"]?(\d+)/i', $rawText, $hMatch)) {
                         $hasUserHeight = true;
                         $userHeightVal = (float) $hMatch[1];
                         $img->setAttribute('height', (string) $userHeightVal);
@@ -70,24 +69,21 @@ class ImageXmlProcessor
                 }
             }
 
-            // Check if it already has both dimensions
             if ($hasUserWidth && $hasUserHeight) {
                 continue;
             }
 
             $src = $img->getAttribute('src');
-            if (!$src) {
+            if (! $src) {
                 continue;
             }
 
-            // Skip if it previously failed, unless we are forcing a retry
-            if ($img->hasAttribute('data-image-dimension-failed') && !$forceRetry) {
+            if ($img->hasAttribute('data-image-dimension-failed') && ! $forceRetry) {
                 continue;
             }
 
-            // Fetch dimensions using the provided callable
             $size = call_user_func($fetchDimensions, $src);
-            
+
             if ($size === null) {
                 continue;
             }
@@ -96,20 +92,17 @@ class ImageXmlProcessor
                 $realWidth = $size[0];
                 $realHeight = $size[1];
 
-                if ($hasUserWidth && !$hasUserHeight) {
-                    // User defined width, calculate height to preserve aspect ratio
+                if ($hasUserWidth && ! $hasUserHeight) {
                     if ($realWidth > 0) {
                         $calcHeight = round($userWidthVal * ($realHeight / $realWidth));
                         $img->setAttribute('height', (string) $calcHeight);
                     }
-                } elseif ($hasUserHeight && !$hasUserWidth) {
-                    // User defined height, calculate width to preserve aspect ratio
+                } elseif ($hasUserHeight && ! $hasUserWidth) {
                     if ($realHeight > 0) {
                         $calcWidth = round($userHeightVal * ($realWidth / $realHeight));
                         $img->setAttribute('width', (string) $calcWidth);
                     }
                 } else {
-                    // Neither defined, inject true dimensions
                     $img->setAttribute('width', (string) $realWidth);
                     $img->setAttribute('height', (string) $realHeight);
                 }

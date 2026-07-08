@@ -64,14 +64,14 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
         if ($hasChanges) {
             $newXml = $dom->saveXML($dom->documentElement);
 
-            // Update XML directly in the database to avoid triggering Flarum's `Revised` events,
-            // which would cause an infinite loop with our own QueueImageDimensionsFetch listener.
+            // Bypass Eloquent events to prevent infinite loops with QueueImageDimensionsFetch.
+            // Optimistic locking (content = original) prevents overwriting concurrent user edits.
             $originalContent = $post->getOriginal('content') ?? $post->parsed_content;
             Post::where('id', $post->id)
                 ->where('content', $originalContent)
                 ->update(['content' => $newXml]);
 
-            // Re-queue it immediately using forceRetry = true
+            // Force retry to ensure failed dimensions are fetched again
             $this->queue->push(
                 new FetchImageDimensionsJob($post->id, null, true)
             );
