@@ -23,3 +23,10 @@ huoxin-auto-image-dimensions:
     trigger_success: Successfully queued {count} jobs!
     proxy_label: HTTP Proxy (SSRF Protection)
     proxy_help: "Route backend image dimension requests through an internal proxy to mask your server's true IP (e.g. tcp://10.0.0.5:3128). Leave blank to disable."
+    permissions:
+      refresh_label: Refresh Post Image Dimensions
+  forum:
+    post_controls:
+      refresh_button: Refresh Image Dimensions
+    alerts:
+      refresh_success: Image dimensions cleared! They will be recalculated shortly.

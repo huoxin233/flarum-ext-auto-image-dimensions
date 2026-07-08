@@ -11,6 +11,7 @@
 
 namespace Huoxin\AutoImageDimensions;
 
+use Flarum\Api\Serializer\PostSerializer;
 use Flarum\Extend;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Console\Scheduling\Event;
@@ -52,7 +53,13 @@ return [
 
     (new Extend\Routes('api'))
         ->post('/image-dimensions/backfill', 'image-dimensions.backfill', Api\Controller\TriggerBackfillController::class)
-        ->post('/auto-image-dimensions/report', 'auto-image-dimensions.report', Api\Controller\ReportDimensionsController::class),
+        ->post('/auto-image-dimensions/report', 'auto-image-dimensions.report', Api\Controller\ReportDimensionsController::class)
+        ->post('/posts/{id}/refresh-image-dimensions', 'posts.refresh-image-dimensions', Api\Controller\RefreshPostDimensionsController::class),
+
+    (new Extend\ApiSerializer(PostSerializer::class))
+        ->attribute('canRefreshImageDimensions', function ($serializer, $post) {
+            return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh');
+        }),
 
     (new Extend\Formatter())
         ->configure(function (Configurator $configurator) {

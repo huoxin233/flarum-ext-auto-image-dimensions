@@ -1,6 +1,10 @@
 import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import CommentPost from 'flarum/forum/components/CommentPost';
+import PostControls from 'flarum/forum/utils/PostControls';
+import Button from 'flarum/common/components/Button';
+import Model from 'flarum/common/Model';
+import Post from 'flarum/common/models/Post';
 
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   // We extend oncreate to run whenever a post is rendered in the DOM
@@ -81,5 +85,28 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
         img.addEventListener('load', reportDimensions, { once: true });
       }
     });
+  });
+
+  Post.prototype.canRefreshImageDimensions = Model.attribute<boolean>('canRefreshImageDimensions');
+
+  extend(PostControls, 'moderationControls', function (items, post) {
+    if (post.canRefreshImageDimensions()) {
+      items.add(
+        'refreshImageDimensions',
+        <Button
+          icon="fas fa-sync"
+          onclick={() => {
+            app.request({
+              method: 'POST',
+              url: app.forum.attribute('apiUrl') + `/posts/${post.id()}/refresh-image-dimensions`,
+            }).then(() => {
+              app.alerts.show({ type: 'success' }, app.translator.trans('huoxin-auto-image-dimensions.forum.alerts.refresh_success'));
+            });
+          }}
+        >
+          {app.translator.trans('huoxin-auto-image-dimensions.forum.post_controls.refresh_button')}
+        </Button>
+      );
+    }
   });
 });

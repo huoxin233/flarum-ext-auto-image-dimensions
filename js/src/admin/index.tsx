@@ -61,7 +61,16 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
           </div>
         </div>
       );
-    });
+    })
+    .registerPermission(
+      {
+        icon: 'fas fa-sync',
+        label: app.translator.trans('huoxin-auto-image-dimensions.admin.permissions.refresh_label'),
+        permission: 'huoxin-auto-image-dimensions.refresh',
+      },
+      'moderate',
+      90
+    );
 
   function triggerBackfill(mode: string) {
     if (!confirm(app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_confirm_text')[0])) {
