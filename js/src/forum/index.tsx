@@ -54,10 +54,12 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
 
     images.forEach((img: HTMLImageElement) => {
       const hasFailedTag = img.hasAttribute('data-image-dimension-failed');
-      const hasWidth = img.hasAttribute('width');
-      const hasHeight = img.hasAttribute('height');
+      const widthVal = img.getAttribute('width');
+      const heightVal = img.getAttribute('height');
+      const hasWidth = widthVal !== null && widthVal !== '';
+      const hasHeight = heightVal !== null && heightVal !== '';
 
-      if (hasWidth && hasHeight && !hasFailedTag) {
+      if ((hasWidth || hasHeight) && !hasFailedTag) {
         return;
       }
 
