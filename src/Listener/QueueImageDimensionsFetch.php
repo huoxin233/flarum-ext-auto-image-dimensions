@@ -72,7 +72,7 @@ class QueueImageDimensionsFetch
      */
     protected function dispatchJob(int $postId, ?Carbon $editedAt)
     {
-        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'backend');
+        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
         if ($mode === 'client') {
             return;
         }

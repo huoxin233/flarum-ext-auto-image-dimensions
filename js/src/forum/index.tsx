@@ -14,6 +14,9 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
     // Only allow logged-in users to report dimensions
     if (!app.session || !app.session.user) return;
 
+    const mode = app.forum.attribute<string>('huoxinAutoImageDimensionsMode') || 'client';
+    if (mode === 'backend') return;
+
     const post = this.attrs.post;
     if (!post) return;
 

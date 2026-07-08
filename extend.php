@@ -26,6 +26,9 @@ return [
         ->js(__DIR__.'/js/dist/forum.js'),
     new Extend\Locales(__DIR__.'/locale'),
 
+    (new Extend\Settings())
+        ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client'),
+
     (new Extend\Event())
         ->subscribe(Listener\QueueImageDimensionsFetch::class),
 
