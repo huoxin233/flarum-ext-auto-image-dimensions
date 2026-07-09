@@ -28,8 +28,8 @@ class ImageXmlProcessorTest extends TestCase
         });
 
         $this->assertNotFalse($newXml);
-        $this->assertStringContainsString('width="800"', $newXml);
-        $this->assertStringContainsString('height="600"', $newXml);
+        $this->assertStringContainsString('width="533"', $newXml);
+        $this->assertStringContainsString('height="400"', $newXml);
         $this->assertStringContainsString('alt="test"', $newXml); // ensure alt wasn't dropped
     }
 
@@ -42,8 +42,8 @@ class ImageXmlProcessorTest extends TestCase
         });
 
         $this->assertNotFalse($newXml);
-        $this->assertStringContainsString('width="1024"', $newXml);
-        $this->assertStringContainsString('height="768"', $newXml);
+        $this->assertStringContainsString('width="533"', $newXml);
+        $this->assertStringContainsString('height="400"', $newXml);
     }
 
     public function test_it_skips_when_both_dimensions_are_present()
@@ -61,6 +61,41 @@ class ImageXmlProcessorTest extends TestCase
         $this->assertFalse($newXml);
         // The fetch callback should never have been executed
         $this->assertFalse($called);
+    }
+
+    public function test_it_caps_height_when_both_dimensions_are_present_and_exceed_max_height()
+    {
+        // Simulated output of [img width=1000 height=1000]
+        $xml = '<r><p><IMG height="1000" src="https://example.com/img.png" width="1000"><s>[img width=1000 height=1000]</s>https://example.com/img.png<e>[/img]</e></IMG></p></r>';
+
+        $called = false;
+        $newXml = $this->processor->process($xml, function ($src) use (&$called) {
+            $called = true;
+            return [1000, 1000];
+        });
+
+        // The processor should rescale it down to 400x400
+        $this->assertNotFalse($newXml);
+        // The fetch callback should never have been executed (it doesn't need natural sizes)
+        $this->assertFalse($called);
+        
+        $this->assertStringContainsString('width="400"', $newXml);
+        $this->assertStringContainsString('height="400"', $newXml);
+    }
+
+    public function test_it_sorts_attributes_alphabetically()
+    {
+        // Out of order attributes with unneeded failure tag
+        $xml = '<r><p><IMG width="1000" src="https://example.com/img.png" data-image-dimension-failed="1" height="1000"><s>[img width=1000 height=1000]</s>https://example.com/img.png<e>[/img]</e></IMG></p></r>';
+
+        $newXml = $this->processor->process($xml, function ($src) {
+            return [1000, 1000];
+        });
+
+        $this->assertNotFalse($newXml);
+        
+        // Assert exact alphabetical order in the output string
+        $this->assertStringContainsString('<IMG height="400" src="https://example.com/img.png" width="400">', $newXml);
     }
 
     public function test_it_recovers_dropped_width_and_calculates_aspect_ratio_height()
@@ -136,7 +171,7 @@ class ImageXmlProcessorTest extends TestCase
 
         $this->assertNotFalse($newXml);
         $this->assertTrue($called);
-        $this->assertStringContainsString('width="800"', $newXml);
+        $this->assertStringContainsString('width="533"', $newXml);
         $this->assertStringNotContainsString('data-image-dimension-failed', $newXml);
     }
 }
