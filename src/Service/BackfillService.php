@@ -14,6 +14,7 @@ namespace Huoxin\AutoImageDimensions\Service;
 use Flarum\Post\CommentPost;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
 use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class BackfillService
 {
@@ -32,13 +33,12 @@ class BackfillService
 
     protected function buildQuery(bool $failedOnly)
     {
-        $query = CommentPost::query();
+        $query = CommentPost::query()
+            ->join('auto_image_dimensions_tracking', 'posts.id', '=', 'auto_image_dimensions_tracking.post_id')
+            ->select('posts.id', 'posts.edited_at');
 
         if ($failedOnly) {
-            $query->where('content', 'LIKE', '%data-image-dimension-failed%');
-        } else {
-            // We only look for IMG tags. ImageXmlProcessor handles deduplication.
-            $query->where('content', 'LIKE', '%<IMG %');
+            $query->where('auto_image_dimensions_tracking.has_failed', 1);
         }
 
         return $query;
@@ -74,6 +74,6 @@ class BackfillService
                     $progressCallback($post);
                 }
             }
-        });
+        }, 'posts.id', 'id');
     }
 }

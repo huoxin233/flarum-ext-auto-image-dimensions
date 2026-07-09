@@ -18,6 +18,7 @@ use Flarum\Post\Post;
 use Flarum\Queue\AbstractJob;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
+use Illuminate\Database\ConnectionInterface;
 
 class FetchImageDimensionsJob extends AbstractJob
 {
@@ -55,7 +56,7 @@ class FetchImageDimensionsJob extends AbstractJob
         $this->ignoreMode = $ignoreMode;
     }
 
-    public function handle(ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
+    public function handle(ImageXmlProcessor $processor, SettingsRepositoryInterface $settings, ConnectionInterface $db)
     {
         /** @var Post|null $post */
         $post = Post::find($this->postId);
@@ -138,6 +139,20 @@ class FetchImageDimensionsJob extends AbstractJob
                 $query->whereNull('edited_at');
             }
             $query->update(['content' => $newXml]);
+        }
+
+        $finalXml = $newXml !== false ? $newXml : $xml;
+        $hasFailedTags = strpos($finalXml, 'data-image-dimension-failed="1"') !== false;
+
+        if ($hasFailedTags) {
+            $db->table('auto_image_dimensions_tracking')->updateOrInsert(
+                ['post_id' => $post->id],
+                ['has_failed' => true, 'last_attempt_at' => Carbon::now()]
+            );
+        } else {
+            $db->table('auto_image_dimensions_tracking')
+                ->where('post_id', $post->id)
+                ->delete();
         }
     }
 }
