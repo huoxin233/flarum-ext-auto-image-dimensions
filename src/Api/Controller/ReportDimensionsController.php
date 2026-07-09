@@ -41,6 +41,10 @@ class ReportDimensionsController implements RequestHandlerInterface
             return new EmptyResponse(403);
         }
 
+        if ($this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client') === 'backend') {
+            return new EmptyResponse(204);
+        }
+
         // Rate Limiting
         $rlKey = 'auto_img_dim.rl.'.$actor->id;
         $count = (int) $this->cache->get($rlKey, 0);
