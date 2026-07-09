@@ -17,6 +17,8 @@ class RefreshDimensionsTest extends TestCase
 
         $this->extension('huoxin-auto-image-dimensions');
 
+        $this->setting('huoxin-auto-image-dimensions.operating_mode', 'backend');
+
         $this->prepareDatabase([
             'users' => [
                 ['id' => 1, 'username' => 'Mural', 'email' => 'mural@machine.local', 'is_email_confirmed' => 1],
