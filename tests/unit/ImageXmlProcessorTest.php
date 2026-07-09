@@ -174,4 +174,47 @@ class ImageXmlProcessorTest extends TestCase
         $this->assertStringContainsString('width="533"', $newXml);
         $this->assertStringNotContainsString('data-image-dimension-failed', $newXml);
     }
+
+    public function test_it_processes_multiple_images_simultaneously()
+    {
+        // Image 1: Needs processing (no dimensions)
+        // Image 2: Has dimensions but exceeds maxHeight (needs scaling)
+        // Image 3: Has dimensions and is under maxHeight (needs skipping)
+        // Image 4: Missing height, has width (needs aspect ratio math)
+        // Image 5: Has failure tag (needs skipping)
+        $xml = '<r><p>'
+             . '<IMG src="https://example.com/identical.png"><s>[img]</s>https://example.com/identical.png<e>[/img]</e></IMG>'
+             . '<IMG width="1000" height="1000" src="https://example.com/identical.png"><s>[img width=1000 height=1000]</s>https://example.com/identical.png<e>[/img]</e></IMG>'
+             . '<IMG width="50" height="50" src="https://example.com/identical.png"><s>[img width=50 height=50]</s>https://example.com/identical.png<e>[/img]</e></IMG>'
+             . '<IMG width="100" src="https://example.com/different.png"><s>[img width=100]</s>https://example.com/different.png<e>[/img]</e></IMG>'
+             . '<IMG data-image-dimension-failed="1" src="https://example.com/failed.png"><s>[img]</s>https://example.com/failed.png<e>[/img]</e></IMG>'
+             . '</p></r>';
+
+        $fetchCounts = 0;
+        $newXml = $this->processor->process($xml, function ($src) use (&$fetchCounts) {
+            $fetchCounts++;
+            if ($src === 'https://example.com/identical.png') {
+                return [800, 600];
+            }
+            if ($src === 'https://example.com/different.png') {
+                return [200, 400];
+            }
+            return false;
+        });
+
+        $this->assertNotFalse($newXml);
+        
+        // Fetch should only be called for Image 1 and Image 4!
+        $this->assertEquals(2, $fetchCounts);
+
+        $this->assertStringContainsString('<IMG height="400" src="https://example.com/identical.png" width="533">', $newXml);
+        $this->assertStringContainsString('<IMG height="400" src="https://example.com/identical.png" width="400">', $newXml);
+        $this->assertStringContainsString('<IMG width="50" height="50" src="https://example.com/identical.png">', $newXml);
+        
+        // Image 4 should calculate height: 100 * (400 / 200) = 200
+        $this->assertStringContainsString('<IMG height="200" src="https://example.com/different.png" width="100">', $newXml);
+        
+        // Image 5 should remain untouched and still have the failure tag
+        $this->assertStringContainsString('<IMG data-image-dimension-failed="1" src="https://example.com/failed.png">', $newXml);
+    }
 }
