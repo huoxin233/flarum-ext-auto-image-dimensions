@@ -35,6 +35,12 @@ php flarum auto-image-dimensions:backfill
 
 # ONLY retry images that previously failed (e.g. due to 404s or timeouts)
 php flarum auto-image-dimensions:backfill --retry-failed
+
+# Dry-run to see exactly which posts would be queued, without actually queueing them
+php flarum auto-image-dimensions:backfill --dry-run --verbose
+
+# Clear all dimensions, optionally see what posts are affected without modifying them
+php flarum auto-image-dimensions:clear-all --dry-run --verbose
 ```
 
 ## Updating

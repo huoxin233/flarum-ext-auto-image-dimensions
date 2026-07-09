@@ -20,7 +20,7 @@ class ClearImageDimensionsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'auto-image-dimensions:clear-all {--force : Force execution without confirmation}';
+    protected $signature = 'auto-image-dimensions:clear-all {--force : Force execution without confirmation} {--dry-run : Only calculate how many posts would be affected}';
 
     /**
      * @var string
@@ -29,11 +29,17 @@ class ClearImageDimensionsCommand extends Command
 
     public function handle()
     {
-        if (! $this->option('force')) {
+        $isDryRun = $this->option('dry-run');
+
+        if (! $this->option('force') && ! $isDryRun) {
             if (! $this->confirm('WARNING: This will strip width and height attributes from EVERY image in the forum. This will cause layout shifts until dimensions are recalculated. Do you wish to continue?')) {
                 $this->info('Aborted.');
                 return;
             }
+        }
+
+        if ($isDryRun) {
+            $this->info('Starting DRY RUN. No changes will be made to the database.');
         }
 
         $this->info('Finding posts with images...');
@@ -58,7 +64,7 @@ class ClearImageDimensionsCommand extends Command
 
         $clearedCount = 0;
 
-        $query->chunk(100, function ($posts) use ($bar, &$clearedCount) {
+        $query->chunk(100, function ($posts) use ($bar, &$clearedCount, $isDryRun) {
             foreach ($posts as $post) {
                 if (! $post->parsed_content) {
                     $bar->advance();
@@ -96,9 +102,13 @@ class ClearImageDimensionsCommand extends Command
                 if ($hasChanges) {
                     $newXml = $dom->saveXML($dom->documentElement);
                     
-                    // Bypass Eloquent events to prevent queueing background jobs
-                    // We just want to wipe the dimensions silently.
-                    Post::where('id', $post->id)->update(['content' => $newXml]);
+                    if (! $isDryRun) {
+                        // Bypass Eloquent events to prevent queueing background jobs
+                        // We just want to wipe the dimensions silently.
+                        Post::where('id', $post->id)->update(['content' => $newXml]);
+                    } elseif ($this->output->isVerbose()) {
+                        $this->line("  -> Post #{$post->id} would have dimensions cleared.");
+                    }
                     
                     $clearedCount++;
                 }
@@ -109,6 +119,11 @@ class ClearImageDimensionsCommand extends Command
 
         $bar->finish();
         $this->line('');
-        $this->info("Successfully cleared dimensions from $clearedCount posts!");
+        
+        if ($isDryRun) {
+            $this->info("DRY RUN: $clearedCount posts would have dimensions cleared.");
+        } else {
+            $this->info("Successfully cleared dimensions from $clearedCount posts!");
+        }
     }
 }

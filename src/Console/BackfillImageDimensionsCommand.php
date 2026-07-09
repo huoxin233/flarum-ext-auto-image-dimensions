@@ -20,7 +20,7 @@ class BackfillImageDimensionsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'auto-image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images}';
+    protected $signature = 'auto-image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images} {--dry-run : Only calculate how many posts would be affected}';
 
     /**
      * @var string
@@ -69,6 +69,24 @@ class BackfillImageDimensionsCommand extends Command
             return;
         }
 
+        $isDryRun = $this->option('dry-run');
+
+        if ($isDryRun) {
+            $this->info("DRY RUN: $count posts would be queued for backfilling.");
+            
+            if ($this->output->isVerbose()) {
+                $this->backfillService->process(
+                    $failedOnly,
+                    $forceRetry,
+                    function ($post) {
+                        $this->line("  -> Post #{$post->id} would be queued.");
+                    },
+                    true // isDryRun
+                );
+            }
+            return;
+        }
+
         $this->info("Found $count posts to process. Queueing jobs...");
 
         $bar = $this->output->createProgressBar($count);
@@ -77,7 +95,7 @@ class BackfillImageDimensionsCommand extends Command
         $this->backfillService->process(
             $failedOnly,
             $forceRetry,
-            function () use ($bar) {
+            function ($post) use ($bar) {
                 $bar->advance();
             }
         );
