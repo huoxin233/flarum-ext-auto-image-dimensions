@@ -138,6 +138,12 @@ class ImageXmlProcessor
                 $img->setAttribute('data-image-dimension-failed', '1');
                 $hasChanges = true;
             }
+
+            // s9e\TextFormatter's regex-based QuickRenderer strictly expects XML attributes
+            // to be in alphabetical order.
+            if ($hasChanges) {
+                $this->sortAttributesAlphabetically($img);
+            }
         }
 
         if ($hasChanges) {
@@ -145,5 +151,23 @@ class ImageXmlProcessor
         }
 
         return false;
+    }
+
+    private function sortAttributesAlphabetically(DOMElement $element): void
+    {
+        $attributes = [];
+        foreach ($element->attributes as $attribute) {
+            $attributes[$attribute->name] = $attribute->value;
+        }
+
+        ksort($attributes);
+
+        foreach (array_keys($attributes) as $name) {
+            $element->removeAttribute($name);
+        }
+
+        foreach ($attributes as $name => $value) {
+            $element->setAttribute($name, $value);
+        }
     }
 }
