@@ -48,7 +48,7 @@ class FetchImageDimensionsJob extends AbstractJob
         $this->forceRetry = $forceRetry;
     }
 
-    public function handle()
+    public function handle(ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
     {
         /** @var Post|null $post */
         $post = Post::find($this->postId);
@@ -68,9 +68,6 @@ class FetchImageDimensionsJob extends AbstractJob
         // DOMDocument requires a single root node (Flarum uses <r> or <t>)
         $xml = $post->parsed_content;
 
-        $processor = new ImageXmlProcessor();
-
-        $settings = resolve(SettingsRepositoryInterface::class);
         $proxy = $settings->get('huoxin-auto-image-dimensions.proxy');
         $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
 

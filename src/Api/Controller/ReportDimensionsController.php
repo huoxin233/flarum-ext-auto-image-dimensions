@@ -22,11 +22,13 @@ class ReportDimensionsController implements RequestHandlerInterface
 
     protected $cache;
     protected $processor;
+    protected $settings;
 
-    public function __construct(Cache $cache, ImageXmlProcessor $processor)
+    public function __construct(Cache $cache, ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
     {
         $this->cache = $cache;
         $this->processor = $processor;
+        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -88,8 +90,7 @@ class ReportDimensionsController implements RequestHandlerInterface
         }
 
         // Inject dimensions (ImageXmlProcessor auto-skips if dimensions exist)
-        $settings = resolve(SettingsRepositoryInterface::class);
-        $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
+        $maxHeight = (int) $this->settings->get('huoxin-auto-image-dimensions.max_height', 400);
 
         $newXml = $this->processor->process($post->parsed_content, function (string $src) use ($imageMap) {
             // Exact match (absolute URLs)
