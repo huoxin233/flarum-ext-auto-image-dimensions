@@ -43,10 +43,10 @@ class TriggerBackfillController implements RequestHandlerInterface
 
         $failedOnly = $retryMode === 'failed_only';
 
-        $forceRetry = true; 
+        $forceRetry = true;
 
         $count = $this->backfillService->getCount($failedOnly);
-        
+
         if ($count > 0) {
             $this->backfillService->process($failedOnly, $forceRetry);
         }

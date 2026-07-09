@@ -4,6 +4,7 @@ namespace Huoxin\AutoImageDimensions\Api\Controller;
 
 use Flarum\Http\RequestUtil;
 use Flarum\Post\Post;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Arr;
@@ -12,7 +13,6 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Flarum\Settings\SettingsRepositoryInterface;
 
 class ReportDimensionsController implements RequestHandlerInterface
 {
@@ -100,6 +100,7 @@ class ReportDimensionsController implements RequestHandlerInterface
                     return $dims;
                 }
             }
+
             return null;
         }, true, $maxHeight);
 

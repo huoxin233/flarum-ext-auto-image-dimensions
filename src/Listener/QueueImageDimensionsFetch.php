@@ -11,13 +11,13 @@
 
 namespace Huoxin\AutoImageDimensions\Listener;
 
+use Carbon\Carbon;
 use Flarum\Post\Event\Posted;
 use Flarum\Post\Event\Revised;
-use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
-use Carbon\Carbon;
 use Flarum\Settings\SettingsRepositoryInterface;
-use Illuminate\Contracts\Queue\Queue;
+use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Queue\Queue;
 
 class QueueImageDimensionsFetch
 {
@@ -25,7 +25,7 @@ class QueueImageDimensionsFetch
      * @var Queue
      */
     protected $queue;
-    
+
     /**
      * @var SettingsRepositoryInterface
      */

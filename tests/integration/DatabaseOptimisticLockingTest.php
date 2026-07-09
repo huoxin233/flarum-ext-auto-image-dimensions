@@ -21,14 +21,14 @@ class DatabaseOptimisticLockingTest extends TestCase
     public function test_optimistic_locking_prevents_stale_overwrites()
     {
         $this->app();
-        
+
         // 1. Background Job fetches the post and begins 5-second HTTP processing
         $staleJobPost = Post::find(1);
 
         // 2. CONCURRENT EDIT: A user edits the post in the UI during those 5 seconds
         $userEditPost = Post::find(1);
         $newEditedAt = Carbon::now();
-        
+
         // We use a raw DB query to simulate the edit to prevent Flarum's Eloquent
         // mutators from treating our raw XML as Markdown and escaping it.
         Post::where('id', 1)->update([
@@ -44,7 +44,7 @@ class DatabaseOptimisticLockingTest extends TestCase
         } else {
             $query->whereNull('edited_at');
         }
-        
+
         $rowsAffected = $query->update(['content' => '<r><p>stale dimensions injected</p></r>']);
 
         // Assert the update was blocked by the database!

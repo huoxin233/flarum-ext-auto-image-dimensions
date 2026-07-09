@@ -66,6 +66,7 @@ class BackfillImageDimensionsCommand extends Command
 
         if ($count === 0) {
             $this->info('No posts found that require backfilling.');
+
             return;
         }
 
@@ -73,7 +74,7 @@ class BackfillImageDimensionsCommand extends Command
 
         if ($isDryRun) {
             $this->info("DRY RUN: $count posts would be queued for backfilling.");
-            
+
             if ($this->output->isVerbose()) {
                 $this->backfillService->process(
                     $failedOnly,
@@ -84,6 +85,7 @@ class BackfillImageDimensionsCommand extends Command
                     true // isDryRun
                 );
             }
+
             return;
         }
 
