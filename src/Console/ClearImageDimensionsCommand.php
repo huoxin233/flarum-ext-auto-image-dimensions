@@ -13,6 +13,7 @@ namespace Huoxin\AutoImageDimensions\Console;
 
 use DOMDocument;
 use Flarum\Post\Post;
+use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 use Illuminate\Console\Command;
 
 class ClearImageDimensionsCommand extends Command
@@ -27,7 +28,7 @@ class ClearImageDimensionsCommand extends Command
      */
     protected $description = 'Clear all cached image dimensions from all posts in the forum.';
 
-    public function handle()
+    public function handle(ImageXmlProcessor $processor)
     {
         $isDryRun = $this->option('dry-run');
 
@@ -66,43 +67,16 @@ class ClearImageDimensionsCommand extends Command
 
         $clearedCount = 0;
 
-        $query->chunkById(100, function ($posts) use ($bar, &$clearedCount, $isDryRun) {
+        $query->chunkById(100, function ($posts) use ($bar, &$clearedCount, $isDryRun, $processor) {
             foreach ($posts as $post) {
                 if (! $post->parsed_content) {
                     $bar->advance();
                     continue;
                 }
 
-                $dom = new DOMDocument();
-                $internalErrors = libxml_use_internal_errors(true);
-                $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$post->parsed_content);
-                libxml_use_internal_errors($internalErrors);
+                $newXml = $processor->clear($post->parsed_content);
 
-                if (! $success) {
-                    $bar->advance();
-                    continue;
-                }
-
-                $images = $dom->getElementsByTagName('IMG');
-                $hasChanges = false;
-
-                foreach ($images as $img) {
-                    if ($img->hasAttribute('width')) {
-                        $img->removeAttribute('width');
-                        $hasChanges = true;
-                    }
-                    if ($img->hasAttribute('height')) {
-                        $img->removeAttribute('height');
-                        $hasChanges = true;
-                    }
-                    if ($img->hasAttribute('data-image-dimension-failed')) {
-                        $img->removeAttribute('data-image-dimension-failed');
-                        $hasChanges = true;
-                    }
-                }
-
-                if ($hasChanges) {
-                    $newXml = $dom->saveXML($dom->documentElement);
+                if ($newXml !== false) {
 
                     if (! $isDryRun) {
                         // Bypass Eloquent events to prevent queueing background jobs
