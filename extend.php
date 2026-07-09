@@ -46,26 +46,40 @@ return [
         ->schedule('auto-image-dimensions:backfill', function (Event $event) {
             $settings = resolve(SettingsRepositoryInterface::class);
             $interval = $settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
-            
-            if ($interval === 'daily') $event->daily();
-            elseif ($interval === 'weekly') $event->weekly();
-            elseif ($interval === 'monthly') $event->monthly();
-            
+
+            if ($interval === 'daily') {
+                $event->daily();
+            } elseif ($interval === 'weekly') {
+                $event->weekly();
+            } elseif ($interval === 'monthly') {
+                $event->monthly();
+            }
+
             $event->when(function () use ($settings, $interval) {
-                if ($interval === 'disabled') return false;
+                if ($interval === 'disabled') {
+                    return false;
+                }
+
                 return $settings->get('huoxin-auto-image-dimensions.retry_mode', 'failed_only') === 'all';
             });
         })
         ->schedule('auto-image-dimensions:backfill --retry-failed', function (Event $event) {
             $settings = resolve(SettingsRepositoryInterface::class);
             $interval = $settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
-            
-            if ($interval === 'daily') $event->daily();
-            elseif ($interval === 'weekly') $event->weekly();
-            elseif ($interval === 'monthly') $event->monthly();
-            
+
+            if ($interval === 'daily') {
+                $event->daily();
+            } elseif ($interval === 'weekly') {
+                $event->weekly();
+            } elseif ($interval === 'monthly') {
+                $event->monthly();
+            }
+
             $event->when(function () use ($settings, $interval) {
-                if ($interval === 'disabled') return false;
+                if ($interval === 'disabled') {
+                    return false;
+                }
+
                 return $settings->get('huoxin-auto-image-dimensions.retry_mode', 'failed_only') === 'failed_only';
             });
         }),

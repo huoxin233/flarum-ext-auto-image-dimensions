@@ -2,7 +2,6 @@
 
 namespace Huoxin\AutoImageDimensions\Api\Controller;
 
-use DOMDocument;
 use Flarum\Http\RequestUtil;
 use Flarum\Post\Post;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
@@ -40,7 +39,6 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
         $newXml = $this->processor->clear($post->parsed_content);
 
         if ($newXml !== false) {
-
             // Bypass Eloquent events to prevent infinite loops with QueueImageDimensionsFetch.
             // Optimistic locking via edited_at prevents overwriting concurrent user edits.
             $query = Post::where('id', $post->id);
