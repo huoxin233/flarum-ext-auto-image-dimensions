@@ -4,6 +4,7 @@ namespace Huoxin\AutoImageDimensions\Api\Controller;
 
 use Flarum\Http\RequestUtil;
 use Flarum\Post\Post;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 use Illuminate\Contracts\Queue\Queue;
@@ -17,11 +18,13 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
 {
     protected $queue;
     protected $processor;
+    protected $settings;
 
-    public function __construct(Queue $queue, ImageXmlProcessor $processor)
+    public function __construct(Queue $queue, ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
     {
         $this->queue = $queue;
         $this->processor = $processor;
+        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -50,10 +53,14 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
             $query->update(['content' => $newXml]);
         }
 
-        // Force retry to ensure failed/missing dimensions are fetched again
-        $this->queue->push(
-            new FetchImageDimensionsJob($post->id, null, true)
-        );
+        // Force retry to ensure failed/missing dimensions are fetched again,
+        // but ONLY if the extension is permitted to use the backend.
+        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
+        if ($mode !== 'client') {
+            $this->queue->push(
+                new FetchImageDimensionsJob($post->id, null, true)
+            );
+        }
 
         return new EmptyResponse(204);
     }

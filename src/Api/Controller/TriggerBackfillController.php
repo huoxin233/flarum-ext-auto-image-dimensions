@@ -12,6 +12,7 @@
 namespace Huoxin\AutoImageDimensions\Api\Controller;
 
 use Flarum\Http\RequestUtil;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Huoxin\AutoImageDimensions\Service\BackfillService;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
@@ -27,16 +28,28 @@ class TriggerBackfillController implements RequestHandlerInterface
     protected $backfillService;
 
     /**
-     * @param BackfillService $backfillService
+     * @var SettingsRepositoryInterface
      */
-    public function __construct(BackfillService $backfillService)
+    protected $settings;
+
+    /**
+     * @param BackfillService $backfillService
+     * @param SettingsRepositoryInterface $settings
+     */
+    public function __construct(BackfillService $backfillService, SettingsRepositoryInterface $settings)
     {
         $this->backfillService = $backfillService;
+        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         RequestUtil::getActor($request)->assertAdmin();
+
+        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
+        if ($mode === 'client') {
+            return new JsonResponse(['error' => 'Backfill cannot be triggered in client mode.'], 400);
+        }
 
         $body = $request->getParsedBody();
         $retryMode = Arr::get($body, 'retry_mode', 'failed_only');

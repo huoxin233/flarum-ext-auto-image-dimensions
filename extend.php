@@ -56,7 +56,7 @@ return [
             }
 
             $event->when(function () use ($settings, $interval) {
-                if ($interval === 'disabled') {
+                if ($interval === 'disabled' || $settings->get('huoxin-auto-image-dimensions.operating_mode', 'client') === 'client') {
                     return false;
                 }
 
@@ -76,7 +76,7 @@ return [
             }
 
             $event->when(function () use ($settings, $interval) {
-                if ($interval === 'disabled') {
+                if ($interval === 'disabled' || $settings->get('huoxin-auto-image-dimensions.operating_mode', 'client') === 'client') {
                     return false;
                 }
 
