@@ -34,6 +34,20 @@ class ImageXmlProcessorTest extends TestCase
         $this->assertStringContainsString('alt="test"', $newXml); // ensure alt wasn't dropped
     }
 
+    public function test_it_sorts_attributes_alphabetically_for_s9e_quickrenderer()
+    {
+        // s9e QuickRenderer demands alphabetical order. Here we supply an unordered set: `src`, then `alt`.
+        $xml = '<r><p><IMG src="https://example.com/img.png" alt="z-test"><s>![test]</s><e>(https://example.com/img.png)</e></IMG></p></r>';
+
+        $newXml = $this->processor->process($xml, function ($src) {
+            return [800, 600];
+        });
+
+        // The expected order should be: alt, height, src, width
+        // Because: a (alt) < h (height) < s (src) < w (width)
+        $this->assertStringContainsString('<IMG alt="z-test" height="400" src="https://example.com/img.png" width="533"', $newXml);
+    }
+
     public function test_it_adds_dimensions_to_standard_bbcode_image()
     {
         $xml = '<r><p><IMG src="https://example.com/img.png"><s>[img]</s>https://example.com/img.png<e>[/img]</e></IMG></p></r>';

@@ -23,10 +23,13 @@ class S9eTagContractTest extends TestCase
 
     public function test_s9e_compiles_images_to_uppercase_img_tag()
     {
-        $markdown = '![alt text](https://example.com/image.png)';
+        $markdown = '![z-alt](https://example.com/image.png)';
         $xml = $this->formatter->parse($markdown);
         
         $this->assertStringContainsString('<IMG ', $xml, 's9e TextFormatter contract violation: The compiled XML no longer contains uppercase <IMG tags. The auto-image-dimensions extension relies on this exact casing for tracking table lookups.');
+        
+        // Assert that s9e natively sorts attributes alphabetically (alt before src)
+        $this->assertStringContainsString('<IMG alt="z-alt" src="https://example.com/image.png"', $xml, 's9e TextFormatter contract violation: Attributes are no longer sorted alphabetically natively.');
     }
 
     public function test_s9e_compiles_bbcode_images_to_uppercase_img_tag()
