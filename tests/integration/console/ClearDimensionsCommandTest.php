@@ -55,7 +55,7 @@ class ClearDimensionsCommandTest extends ConsoleTestCase
 
     public function test_it_clears_dimensions_from_all_posts()
     {
-        $output = $this->runCommand(['command' => 'image-dimensions:clear-all', '--force' => true]);
+        $output = $this->runCommand(['command' => 'auto-image-dimensions:clear-all', '--force' => true]);
 
         $this->assertStringContainsString('Successfully cleared dimensions from 2 posts', $output);
 

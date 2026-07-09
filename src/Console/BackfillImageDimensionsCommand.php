@@ -20,7 +20,7 @@ class BackfillImageDimensionsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images}';
+    protected $signature = 'auto-image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images}';
 
     /**
      * @var string

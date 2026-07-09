@@ -20,7 +20,7 @@ class ClearImageDimensionsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'image-dimensions:clear-all {--force : Force execution without confirmation}';
+    protected $signature = 'auto-image-dimensions:clear-all {--force : Force execution without confirmation}';
 
     /**
      * @var string

@@ -36,7 +36,7 @@ return [
     (new Extend\Console())
         ->command(Console\BackfillImageDimensionsCommand::class)
         ->command(Console\ClearImageDimensionsCommand::class)
-        ->schedule('image-dimensions:backfill', function (Event $event) {
+        ->schedule('auto-image-dimensions:backfill', function (Event $event) {
             $settings = resolve(SettingsRepositoryInterface::class);
             $interval = $settings->get('huoxin-auto-image-dimensions.schedule_interval', 'disabled');
             $retryMode = $settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');

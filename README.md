@@ -31,10 +31,10 @@ If you have thousands of existing posts, you can manually trigger a backfill fro
 
 ```sh
 # Fetch dimensions for ALL images that don't have them
-php flarum image-dimensions:backfill
+php flarum auto-image-dimensions:backfill
 
 # ONLY retry images that previously failed (e.g. due to 404s or timeouts)
-php flarum image-dimensions:backfill --retry-failed
+php flarum auto-image-dimensions:backfill --retry-failed
 ```
 
 ## Updating
