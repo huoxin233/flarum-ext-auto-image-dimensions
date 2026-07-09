@@ -102,9 +102,13 @@ class ReportDimensionsController implements RequestHandlerInterface
                 return $imageMap[$src];
             }
             // Fallback for relative URLs stored in XML (browser always reports absolute URLs)
+            $requestHost = $request->getUri()->getHost();
             foreach ($imageMap as $reportedUrl => $dims) {
                 if (str_ends_with($reportedUrl, $src)) {
-                    return $dims;
+                    // Prevent dimension spoofing by ensuring the reported URL originates from this request's exact domain
+                    if (parse_url($reportedUrl, PHP_URL_HOST) === $requestHost) {
+                        return $dims;
+                    }
                 }
             }
 
