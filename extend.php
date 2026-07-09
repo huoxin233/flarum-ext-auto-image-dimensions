@@ -30,6 +30,13 @@ return [
         ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client')
         ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', null, 400),
 
+    (new Extend\Settings())
+        ->default('huoxin-auto-image-dimensions.operating_mode', 'client')
+        ->default('huoxin-auto-image-dimensions.max_height', 400)
+        ->default('huoxin-auto-image-dimensions.schedule_interval', 'disabled')
+        ->default('huoxin-auto-image-dimensions.retry_mode', 'failed_only')
+        ->default('huoxin-auto-image-dimensions.proxy', ''),
+
     (new Extend\Event())
         ->subscribe(Listener\QueueImageDimensionsFetch::class),
 
