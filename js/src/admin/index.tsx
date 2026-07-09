@@ -13,5 +13,15 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       },
       'moderate',
       90
+    )
+    .registerPermission(
+      {
+        icon: 'fas fa-image',
+        label: app.translator.trans('huoxin-auto-image-dimensions.admin.permissions.report_label'),
+        permission: 'huoxin-auto-image-dimensions.report',
+        allowGuest: true,
+      },
+      'view',
+      90
     );
 });

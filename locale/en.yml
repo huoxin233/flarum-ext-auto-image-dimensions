@@ -26,7 +26,8 @@ huoxin-auto-image-dimensions:
     max_height_label: Maximum Image Height
     max_height_help: "Set a mathematical height limit for images (e.g. 400). The extension will proportionally scale down widths to preserve aspect ratios without breaking layout constraints. Set to 0 to disable."
     permissions:
-      refresh_label: Refresh Post Image Dimensions
+      refresh_label: Allow refresh Post Image Dimensions
+      report_label: Allow report Client-Side Image Dimensions
   forum:
     post_controls:
       refresh_button: Refresh Image Dimensions

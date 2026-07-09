@@ -33,6 +33,8 @@ class ReportDimensionsController implements RequestHandlerInterface
     {
         $actor = RequestUtil::getActor($request);
 
+        $actor->assertCan('huoxin-auto-image-dimensions.report');
+
         if ($actor->isGuest()) {
             return new EmptyResponse(403);
         }
