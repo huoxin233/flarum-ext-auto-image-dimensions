@@ -48,12 +48,12 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
                 $query->whereNull('edited_at');
             }
             $query->update(['content' => $newXml]);
-
-            // Force retry to ensure failed dimensions are fetched again
-            $this->queue->push(
-                new FetchImageDimensionsJob($post->id, null, true)
-            );
         }
+
+        // Force retry to ensure failed/missing dimensions are fetched again
+        $this->queue->push(
+            new FetchImageDimensionsJob($post->id, null, true)
+        );
 
         return new EmptyResponse(204);
     }
