@@ -104,7 +104,7 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
       })
       .catch((error: unknown) => {
         console.error(error);
-        app.alerts.show({ type: 'error' }, 'An error occurred while triggering the backfill.');
+        app.alerts.show({ type: 'error' }, app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_error'));
       });
   }
 }
