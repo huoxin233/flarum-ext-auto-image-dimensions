@@ -66,6 +66,12 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
                   placeholder: 'tcp://10.0.0.5:3128',
                 })}
 
+                {!this.setting('huoxin-auto-image-dimensions.proxy')() && (
+                  <div className="Alert Alert--warning">
+                    <span className="Alert-body">{app.translator.trans('huoxin-auto-image-dimensions.admin.proxy_warning')}</span>
+                  </div>
+                )}
+
                 <div className="Form-group">
                   <label>{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_label')}</label>
                   <div className="helpText">{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_help')}</div>

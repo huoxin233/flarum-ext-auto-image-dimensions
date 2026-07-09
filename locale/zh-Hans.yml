@@ -22,6 +22,7 @@ huoxin-auto-image-dimensions:
     trigger_confirm_text: 您确定要将这些任务加入队列吗？这将在后台运行。
     trigger_success: 成功将 {count} 个任务加入队列！
     trigger_error: 触发后台任务队列时发生错误。
+    proxy_warning: "警告：在未配置 HTTP 代理的情况下运行后端/混合模式会使您的服务器容易受到 SSRF（DNS 重绑定）攻击。您仅应在了解并接受此风险的情况下继续。"
     proxy_label: HTTP 代理 (SSRF 防护)
     proxy_help: "通过内部代理路由后端的图片尺寸请求，以隐藏您服务器的真实 IP (例如 tcp://10.0.0.5:3128)。强烈建议使用代理以防止高级 SSRF（DNS 重绑定）攻击！留空则仅使用基础的 PHP IP 过滤防护。"
     max_height_label: 最大图片高度

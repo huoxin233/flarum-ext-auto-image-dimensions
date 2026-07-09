@@ -22,6 +22,7 @@ huoxin-auto-image-dimensions:
     trigger_confirm_text: Are you sure you want to queue these jobs? This will run in the background.
     trigger_success: Successfully queued {count} jobs!
     trigger_error: An error occurred while triggering the backfill.
+    proxy_warning: "WARNING: Running Backend/Hybrid mode without an HTTP Proxy leaves your server vulnerable to SSRF (DNS Rebinding) attacks. You should only proceed if you understand and accept this risk."
     proxy_label: HTTP Proxy (SSRF Protection)
     proxy_help: "Route backend image dimension requests through an internal proxy to mask your server's true IP (e.g. tcp://10.0.0.5:3128). STRONGLY RECOMMENDED to protect against advanced SSRF (DNS rebinding) attacks! Leave blank to use basic PHP IP filtering."
     max_height_label: Maximum Image Height
