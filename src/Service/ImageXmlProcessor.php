@@ -43,6 +43,7 @@ class ImageXmlProcessor
         $hasChanges = false;
 
         foreach ($images as $img) {
+            $imgHasChanges = false;
             /** @var DOMElement $img */
 
             $hasUserWidth = $img->hasAttribute('width');
@@ -61,11 +62,13 @@ class ImageXmlProcessor
                         $hasUserWidth = true;
                         $userWidthVal = (float) $wMatch[1];
                         $img->setAttribute('width', (string) $userWidthVal);
+                        $imgHasChanges = true;
                     }
                     if (! $hasUserHeight && preg_match('/height=[\'"]?(\d+)/i', $rawText, $hMatch)) {
                         $hasUserHeight = true;
                         $userHeightVal = (float) $hMatch[1];
                         $img->setAttribute('height', (string) $userHeightVal);
+                        $imgHasChanges = true;
                     }
                 }
             }
@@ -76,8 +79,15 @@ class ImageXmlProcessor
                     $img->setAttribute('width', (string) $calcWidth);
                     $img->setAttribute('height', (string) $maxHeight);
                     $img->removeAttribute('data-image-dimension-failed');
+                    $imgHasChanges = true;
+                }
+                
+                // Ensure attributes are sorted before we skip the rest of the processing
+                if ($imgHasChanges) {
+                    $this->sortAttributesAlphabetically($img);
                     $hasChanges = true;
                 }
+                
                 continue;
             }
 
@@ -133,16 +143,17 @@ class ImageXmlProcessor
                 }
 
                 $img->removeAttribute('data-image-dimension-failed');
-                $hasChanges = true;
+                $imgHasChanges = true;
             } else {
                 $img->setAttribute('data-image-dimension-failed', '1');
-                $hasChanges = true;
+                $imgHasChanges = true;
             }
 
             // s9e\TextFormatter's regex-based QuickRenderer strictly expects XML attributes
             // to be in alphabetical order.
-            if ($hasChanges) {
+            if ($imgHasChanges) {
                 $this->sortAttributesAlphabetically($img);
+                $hasChanges = true;
             }
         }
 
