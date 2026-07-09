@@ -9,7 +9,7 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
     const isClient = mode === 'client';
 
     return (
-      <div className="AutoImageDimensionsSettingsPage">
+      <div className="ExtensionPage-settings AutoImageDimensionsSettingsPage">
         <div className="container">
           <div className="Form">
             {this.buildSettingComponent({
