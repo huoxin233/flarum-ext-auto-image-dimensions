@@ -22,7 +22,7 @@ huoxin-auto-image-dimensions:
     trigger_confirm_text: Are you sure you want to queue these jobs? This will run in the background.
     trigger_success: Successfully queued {count} jobs!
     proxy_label: HTTP Proxy (SSRF Protection)
-    proxy_help: "Route backend image dimension requests through an internal proxy to mask your server's true IP (e.g. tcp://10.0.0.5:3128). Leave blank to disable."
+    proxy_help: "Route backend image dimension requests through an internal proxy to mask your server's true IP (e.g. tcp://10.0.0.5:3128). STRONGLY RECOMMENDED to protect against advanced SSRF (DNS rebinding) attacks! Leave blank to use basic PHP IP filtering."
     max_height_label: Maximum Image Height
     max_height_help: "Set a mathematical height limit for images (e.g. 400). The extension will proportionally scale down widths to preserve aspect ratios without breaking layout constraints. Set to 0 to disable."
     permissions:

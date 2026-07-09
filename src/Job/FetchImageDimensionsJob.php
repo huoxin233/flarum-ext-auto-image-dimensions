@@ -76,6 +76,22 @@ class FetchImageDimensionsJob extends AbstractJob
 
         $newXml = $processor->process($xml, function (string $src) use ($proxy) {
             try {
+                if (! $proxy) {
+                    $parsed = parse_url($src);
+                    if (! isset($parsed['scheme']) || ! in_array(strtolower($parsed['scheme']), ['http', 'https'], true)) {
+                        return false;
+                    }
+                    if (isset($parsed['host'])) {
+                        $ip = gethostbyname($parsed['host']);
+                        if ($ip === $parsed['host'] && ! filter_var($ip, FILTER_VALIDATE_IP)) {
+                            return false; // DNS failed
+                        }
+                        if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                            return false; // SSRF blocked (Private/Reserved IP)
+                        }
+                    }
+                }
+
                 $fastImageSize = new FastImageSize();
 
                 if ($proxy) {
