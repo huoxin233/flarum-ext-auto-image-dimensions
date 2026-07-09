@@ -88,9 +88,5 @@ return [
             $configurator->templateNormalizer->add(
                 new SetAttributeOnElements('//img[not(@width)]', 'width', '{@width}')
             );
-
-            if ($configurator->BBCodes->collection->exists('IMG')) {
-                $configurator->BBCodes->addFromRepository('IMG');
-            }
         }),
 ];
