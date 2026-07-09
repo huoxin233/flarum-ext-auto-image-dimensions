@@ -58,7 +58,7 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
         $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
         if ($mode !== 'client') {
             $this->queue->push(
-                new FetchImageDimensionsJob($post->id, null, true)
+                new FetchImageDimensionsJob($post->id, $post->edited_at ? $post->edited_at->toIso8601String() : null, true)
             );
         }
 

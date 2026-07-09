@@ -63,6 +63,10 @@ class FetchImageDimensionsJob extends AbstractJob
         }
 
         // Abort if post was edited after job was queued
+        if ($this->editedAt === null && $post->edited_at !== null) {
+            return;
+        }
+
         if ($this->editedAt !== null && $post->edited_at !== null) {
             $jobEditedAt = Carbon::parse($this->editedAt);
             if ($post->edited_at->gt($jobEditedAt)) {

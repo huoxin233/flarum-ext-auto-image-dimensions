@@ -67,7 +67,7 @@ class BackfillService
         $query->chunkById(100, function ($posts) use ($forceRetry, $progressCallback, $isDryRun) {
             foreach ($posts as $post) {
                 if (! $isDryRun) {
-                    $this->queue->push(new FetchImageDimensionsJob($post->id, null, $forceRetry));
+                    $this->queue->push(new FetchImageDimensionsJob($post->id, $post->edited_at ? $post->edited_at->toIso8601String() : null, $forceRetry));
                 }
                 if ($progressCallback) {
                     $progressCallback($post);
