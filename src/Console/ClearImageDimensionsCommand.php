@@ -66,7 +66,7 @@ class ClearImageDimensionsCommand extends Command
 
         $clearedCount = 0;
 
-        $query->chunk(100, function ($posts) use ($bar, &$clearedCount, $isDryRun) {
+        $query->chunkById(100, function ($posts) use ($bar, &$clearedCount, $isDryRun) {
             foreach ($posts as $post) {
                 if (! $post->parsed_content) {
                     $bar->advance();
