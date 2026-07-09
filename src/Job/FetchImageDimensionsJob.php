@@ -57,6 +57,11 @@ class FetchImageDimensionsJob extends AbstractJob
             return;
         }
 
+        $mode = $settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
+        if ($mode === 'client') {
+            return;
+        }
+
         // Abort if post was edited after job was queued
         if ($this->editedAt !== null && $post->edited_at !== null) {
             $jobEditedAt = Carbon::parse($this->editedAt);
