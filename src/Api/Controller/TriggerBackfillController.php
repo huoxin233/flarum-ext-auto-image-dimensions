@@ -39,7 +39,7 @@ class TriggerBackfillController implements RequestHandlerInterface
         RequestUtil::getActor($request)->assertAdmin();
 
         $body = $request->getParsedBody();
-        $retryMode = Arr::get($body, 'retry_mode', 'all');
+        $retryMode = Arr::get($body, 'retry_mode', 'failed_only');
 
         $failedOnly = $retryMode === 'failed_only';
 

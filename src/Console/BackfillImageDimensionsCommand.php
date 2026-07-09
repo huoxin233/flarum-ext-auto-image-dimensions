@@ -56,7 +56,7 @@ class BackfillImageDimensionsCommand extends Command
         $failedOnly = $this->option('failed-only');
 
         // Fallback to settings if no CLI flags provided
-        $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'all');
+        $retryMode = $this->settings->get('huoxin-auto-image-dimensions.retry_mode', 'failed_only');
         if (! $forceRetry && ! $failedOnly && $retryMode === 'failed_only') {
             $failedOnly = true;
             $forceRetry = true;

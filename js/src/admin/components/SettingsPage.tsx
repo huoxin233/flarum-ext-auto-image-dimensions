@@ -53,10 +53,10 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
                   help: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_help'),
                   type: 'select',
                   options: {
-                    all: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_all'),
                     failed_only: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_failed_only'),
+                    all: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_all'),
                   },
-                  default: 'all',
+                  default: 'failed_only',
                 })}
                 {this.buildSettingComponent({
                   setting: 'huoxin-auto-image-dimensions.proxy',
