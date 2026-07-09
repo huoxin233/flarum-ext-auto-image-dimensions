@@ -50,6 +50,12 @@ class BackfillImageDimensionsCommand extends Command
 
     public function handle()
     {
+        $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
+        if ($mode === 'client') {
+            $this->error('Aborted: Extension is configured to client mode. Backend backfilling is disabled.');
+            return 1;
+        }
+
         $this->info('Finding posts with images lacking dimensions...');
 
         $forceRetry = $this->option('retry-failed');
