@@ -79,7 +79,13 @@ class ClearImageDimensionsCommand extends Command
                     if (! $isDryRun) {
                         // Bypass Eloquent events to prevent queueing background jobs
                         // We just want to wipe the dimensions silently.
-                        Post::where('id', $post->id)->update(['content' => $newXml]);
+                        $updateQuery = Post::where('id', $post->id);
+                        if ($post->edited_at) {
+                            $updateQuery->where('edited_at', $post->edited_at);
+                        } else {
+                            $updateQuery->whereNull('edited_at');
+                        }
+                        $updateQuery->update(['content' => $newXml]);
                     } elseif ($this->output->isVerbose()) {
                         $this->line("  -> Post #{$post->id} would have dimensions cleared.");
                     }
