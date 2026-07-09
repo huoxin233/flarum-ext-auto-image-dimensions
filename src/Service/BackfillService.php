@@ -58,16 +58,17 @@ class BackfillService
      * @param bool $forceRetry
      * @param callable|null $progressCallback
      * @param bool $isDryRun
+     * @param bool $ignoreMode
      * @return void
      */
-    public function process(bool $failedOnly, bool $forceRetry, ?callable $progressCallback = null, bool $isDryRun = false): void
+    public function process(bool $failedOnly, bool $forceRetry, ?callable $progressCallback = null, bool $isDryRun = false, bool $ignoreMode = false): void
     {
         $query = $this->buildQuery($failedOnly);
 
-        $query->chunkById(100, function ($posts) use ($forceRetry, $progressCallback, $isDryRun) {
+        $query->chunkById(100, function ($posts) use ($forceRetry, $progressCallback, $isDryRun, $ignoreMode) {
             foreach ($posts as $post) {
                 if (! $isDryRun) {
-                    $this->queue->push(new FetchImageDimensionsJob($post->id, $post->edited_at ? $post->edited_at->toIso8601String() : null, $forceRetry));
+                    $this->queue->push(new FetchImageDimensionsJob($post->id, $post->edited_at ? $post->edited_at->toIso8601String() : null, $forceRetry, $ignoreMode));
                 }
                 if ($progressCallback) {
                     $progressCallback($post);

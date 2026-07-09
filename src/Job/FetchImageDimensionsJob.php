@@ -37,15 +37,22 @@ class FetchImageDimensionsJob extends AbstractJob
     protected $forceRetry;
 
     /**
+     * @var bool
+     */
+    protected $ignoreMode;
+
+    /**
      * @param int $postId
      * @param string|null $editedAt
      * @param bool $forceRetry
+     * @param bool $ignoreMode
      */
-    public function __construct(int $postId, ?string $editedAt, bool $forceRetry = false)
+    public function __construct(int $postId, ?string $editedAt, bool $forceRetry = false, bool $ignoreMode = false)
     {
         $this->postId = $postId;
         $this->editedAt = $editedAt;
         $this->forceRetry = $forceRetry;
+        $this->ignoreMode = $ignoreMode;
     }
 
     public function handle(ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
@@ -58,7 +65,7 @@ class FetchImageDimensionsJob extends AbstractJob
         }
 
         $mode = $settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
-        if ($mode === 'client') {
+        if ($mode === 'client' && ! $this->ignoreMode) {
             return;
         }
 

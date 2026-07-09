@@ -20,7 +20,7 @@ class BackfillImageDimensionsCommand extends Command
     /**
      * @var string
      */
-    protected $signature = 'auto-image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images} {--dry-run : Only calculate how many posts would be affected}';
+    protected $signature = 'auto-image-dimensions:backfill {--retry-failed : Force retry of previously failed images} {--failed-only : Only process previously failed images} {--dry-run : Only calculate how many posts would be affected} {--ignore-mode : Run backfill even if operating mode is client}';
 
     /**
      * @var string
@@ -51,8 +51,9 @@ class BackfillImageDimensionsCommand extends Command
     public function handle()
     {
         $mode = $this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client');
-        if ($mode === 'client') {
+        if ($mode === 'client' && ! $this->option('ignore-mode')) {
             $this->error('Aborted: Extension is configured to client mode. Backend backfilling is disabled.');
+            $this->line('Hint: Use --ignore-mode to force the backfill to run anyway.');
             return 1;
         }
 
@@ -88,7 +89,8 @@ class BackfillImageDimensionsCommand extends Command
                     function ($post) {
                         $this->line("  -> Post #{$post->id} would be queued.");
                     },
-                    true // isDryRun
+                    $isDryRun,
+                    $this->option('ignore-mode')
                 );
             }
 
@@ -105,7 +107,9 @@ class BackfillImageDimensionsCommand extends Command
             $forceRetry,
             function ($post) use ($bar) {
                 $bar->advance();
-            }
+            },
+            $isDryRun,
+            $this->option('ignore-mode')
         );
 
         $bar->finish();
