@@ -6,6 +6,7 @@ use DOMDocument;
 use Flarum\Http\RequestUtil;
 use Flarum\Post\Post;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
+use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -16,10 +17,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 class RefreshPostDimensionsController implements RequestHandlerInterface
 {
     protected $queue;
+    protected $processor;
 
-    public function __construct(Queue $queue)
+    public function __construct(Queue $queue, ImageXmlProcessor $processor)
     {
         $this->queue = $queue;
+        $this->processor = $processor;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -34,35 +37,9 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
             return new EmptyResponse(204);
         }
 
-        $dom = new DOMDocument();
-        $internalErrors = libxml_use_internal_errors(true);
-        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$post->parsed_content);
-        libxml_use_internal_errors($internalErrors);
+        $newXml = $this->processor->clear($post->parsed_content);
 
-        if (! $success) {
-            return new EmptyResponse(204);
-        }
-
-        $images = $dom->getElementsByTagName('IMG');
-        $hasChanges = false;
-
-        foreach ($images as $img) {
-            if ($img->hasAttribute('width')) {
-                $img->removeAttribute('width');
-                $hasChanges = true;
-            }
-            if ($img->hasAttribute('height')) {
-                $img->removeAttribute('height');
-                $hasChanges = true;
-            }
-            if ($img->hasAttribute('data-image-dimension-failed')) {
-                $img->removeAttribute('data-image-dimension-failed');
-                $hasChanges = true;
-            }
-        }
-
-        if ($hasChanges) {
-            $newXml = $dom->saveXML($dom->documentElement);
+        if ($newXml !== false) {
 
             // Bypass Eloquent events to prevent infinite loops with QueueImageDimensionsFetch.
             // Optimistic locking via edited_at prevents overwriting concurrent user edits.

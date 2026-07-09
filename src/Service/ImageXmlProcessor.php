@@ -180,4 +180,46 @@ class ImageXmlProcessor
             $element->setAttribute($name, $value);
         }
     }
+
+    /**
+     * Clear all image dimension attributes from the XML.
+     *
+     * @param string $xml The raw XML string
+     * @return string|false The modified XML, or false if parsing failed/no changes
+     */
+    public function clear(string $xml)
+    {
+        $dom = new DOMDocument();
+        $internalErrors = libxml_use_internal_errors(true);
+        $success = $dom->loadXML('<?xml version="1.0" encoding="UTF-8"?>'.$xml);
+        libxml_use_internal_errors($internalErrors);
+
+        if (! $success) {
+            return false;
+        }
+
+        $images = $dom->getElementsByTagName('IMG');
+        $hasChanges = false;
+
+        foreach ($images as $img) {
+            if ($img->hasAttribute('width')) {
+                $img->removeAttribute('width');
+                $hasChanges = true;
+            }
+            if ($img->hasAttribute('height')) {
+                $img->removeAttribute('height');
+                $hasChanges = true;
+            }
+            if ($img->hasAttribute('data-image-dimension-failed')) {
+                $img->removeAttribute('data-image-dimension-failed');
+                $hasChanges = true;
+            }
+        }
+
+        if ($hasChanges) {
+            return $dom->saveXML($dom->documentElement);
+        }
+
+        return false;
+    }
 }
