@@ -60,7 +60,7 @@ class BackfillService
      * @param bool $isDryRun
      * @return void
      */
-    public function process(bool $failedOnly, bool $forceRetry, callable $progressCallback = null, bool $isDryRun = false): void
+    public function process(bool $failedOnly, bool $forceRetry, ?callable $progressCallback = null, bool $isDryRun = false): void
     {
         $query = $this->buildQuery($failedOnly);
 

@@ -21,7 +21,6 @@ use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 
 class FetchImageDimensionsJob extends AbstractJob
 {
-
     /**
      * @var int
      */

@@ -45,7 +45,6 @@ class ImageXmlProcessor
         foreach ($images as $img) {
             $imgHasChanges = false;
             /** @var DOMElement $img */
-
             $hasUserWidth = $img->hasAttribute('width');
             $hasUserHeight = $img->hasAttribute('height');
 
@@ -81,13 +80,13 @@ class ImageXmlProcessor
                     $img->removeAttribute('data-image-dimension-failed');
                     $imgHasChanges = true;
                 }
-                
+
                 // Ensure attributes are sorted before we skip the rest of the processing
                 if ($imgHasChanges) {
                     $this->sortAttributesAlphabetically($img);
                     $hasChanges = true;
                 }
-                
+
                 continue;
             }
 

@@ -34,6 +34,7 @@ class ClearImageDimensionsCommand extends Command
         if (! $this->option('force') && ! $isDryRun) {
             if (! $this->confirm('WARNING: This will strip width and height attributes from EVERY image in the forum. This will cause layout shifts until dimensions are recalculated. Do you wish to continue?')) {
                 $this->info('Aborted.');
+
                 return;
             }
         }
@@ -54,6 +55,7 @@ class ClearImageDimensionsCommand extends Command
 
         if ($total === 0) {
             $this->info('No posts found containing images.');
+
             return;
         }
 
@@ -101,7 +103,7 @@ class ClearImageDimensionsCommand extends Command
 
                 if ($hasChanges) {
                     $newXml = $dom->saveXML($dom->documentElement);
-                    
+
                     if (! $isDryRun) {
                         // Bypass Eloquent events to prevent queueing background jobs
                         // We just want to wipe the dimensions silently.
@@ -109,7 +111,7 @@ class ClearImageDimensionsCommand extends Command
                     } elseif ($this->output->isVerbose()) {
                         $this->line("  -> Post #{$post->id} would have dimensions cleared.");
                     }
-                    
+
                     $clearedCount++;
                 }
 
@@ -119,7 +121,7 @@ class ClearImageDimensionsCommand extends Command
 
         $bar->finish();
         $this->line('');
-        
+
         if ($isDryRun) {
             $this->info("DRY RUN: $clearedCount posts would have dimensions cleared.");
         } else {

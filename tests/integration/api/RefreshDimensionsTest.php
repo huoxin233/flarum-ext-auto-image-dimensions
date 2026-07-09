@@ -57,7 +57,7 @@ class RefreshDimensionsTest extends TestCase
         // Attributes should be stripped from the XML
         $this->assertStringNotContainsString('width="533"', $post->parsed_content);
         $this->assertStringNotContainsString('height="400"', $post->parsed_content);
-        
+
         // Because the test environment uses a synchronous queue, the Job runs immediately,
         // fails to fetch the fake URL, and injects the failure tag.
         $this->assertStringContainsString('data-image-dimension-failed="1"', $post->parsed_content);
