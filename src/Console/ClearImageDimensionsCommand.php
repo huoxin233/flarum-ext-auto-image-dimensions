@@ -11,7 +11,6 @@
 
 namespace Huoxin\AutoImageDimensions\Console;
 
-use DOMDocument;
 use Flarum\Post\Post;
 use Huoxin\AutoImageDimensions\Service\ImageXmlProcessor;
 use Illuminate\Console\Command;
@@ -77,7 +76,6 @@ class ClearImageDimensionsCommand extends Command
                 $newXml = $processor->clear($post->parsed_content);
 
                 if ($newXml !== false) {
-
                     if (! $isDryRun) {
                         // Bypass Eloquent events to prevent queueing background jobs
                         // We just want to wipe the dimensions silently.
