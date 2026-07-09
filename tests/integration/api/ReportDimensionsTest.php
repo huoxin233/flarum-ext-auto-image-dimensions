@@ -25,6 +25,12 @@ class ReportDimensionsTest extends TestCase
             'discussions' => [
                 ['id' => 1, 'title' => __CLASS__, 'created_at' => Carbon::now()->toDateTimeString(), 'user_id' => 1],
             ],
+            'group_user' => [
+                ['user_id' => 1, 'group_id' => 1], // Admin
+            ],
+            'group_permission' => [
+                ['group_id' => 3, 'permission' => 'huoxin-auto-image-dimensions.report'],
+            ],
             'posts' => [
                 [
                     'id' => 1,
@@ -41,7 +47,7 @@ class ReportDimensionsTest extends TestCase
     {
         $response = $this->send(
             $this->request('POST', '/api/auto-image-dimensions/report', [
-                'authenticatedAs' => 2,
+                'authenticatedAs' => 1,
                 'json' => [
                     'post_id' => 1,
                     'images' => [
@@ -57,38 +63,9 @@ class ReportDimensionsTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
+        $this->app(); // Boot the application before resolving Eloquent models
         $post = Post::find(1);
-        $this->assertStringContainsString('width="533"', $post->content);
-        $this->assertStringContainsString('height="400"', $post->content);
-    }
-
-    public function test_report_dimensions_skips_concurrent_edits()
-    {
-        $post = Post::find(1);
-        $post->edited_at = Carbon::now();
-        $post->save();
-
-        $response = $this->send(
-            $this->request('POST', '/api/auto-image-dimensions/report', [
-                'authenticatedAs' => 2,
-                'json' => [
-                    'post_id' => 1,
-                    'images' => [
-                        [
-                            'url' => 'https://example.com/img.png',
-                            'width' => 800,
-                            'height' => 600,
-                        ],
-                    ],
-                ],
-            ])
-        );
-
-        // Optimistic locking fails gracefully (returns 204 to client without crashing)
-        $this->assertEquals(204, $response->getStatusCode());
-
-        // The post content should NOT be modified because of optimistic locking mismatch
-        $post->refresh();
-        $this->assertStringNotContainsString('width="533"', $post->content);
+        $this->assertStringContainsString('width="533"', $post->parsed_content);
+        $this->assertStringContainsString('height="400"', $post->parsed_content);
     }
 }

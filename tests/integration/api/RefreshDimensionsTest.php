@@ -52,11 +52,15 @@ class RefreshDimensionsTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
 
+        $this->app();
         $post = Post::find(1);
         // Attributes should be stripped from the XML
-        $this->assertStringNotContainsString('width="533"', $post->content);
-        $this->assertStringNotContainsString('height="400"', $post->content);
-        $this->assertStringContainsString('<IMG src="https://example.com/img.png">', $post->content);
+        $this->assertStringNotContainsString('width="533"', $post->parsed_content);
+        $this->assertStringNotContainsString('height="400"', $post->parsed_content);
+        
+        // Because the test environment uses a synchronous queue, the Job runs immediately,
+        // fails to fetch the fake URL, and injects the failure tag.
+        $this->assertStringContainsString('data-image-dimension-failed="1"', $post->parsed_content);
     }
 
     public function test_normal_user_cannot_refresh_dimensions()
@@ -70,8 +74,9 @@ class RefreshDimensionsTest extends TestCase
         // 403 Forbidden
         $this->assertEquals(403, $response->getStatusCode());
 
+        $this->app();
         $post = Post::find(1);
         // Attributes should NOT be stripped
-        $this->assertStringContainsString('width="533"', $post->content);
+        $this->assertStringContainsString('width="533"', $post->parsed_content);
     }
 }

@@ -59,15 +59,16 @@ class ClearDimensionsCommandTest extends ConsoleTestCase
 
         $this->assertStringContainsString('Successfully cleared dimensions from 2 posts', $output);
 
+        $this->app();
         $post1 = Post::find(1);
-        $this->assertStringNotContainsString('width="533"', $post1->content);
-        $this->assertStringNotContainsString('height="400"', $post1->content);
+        $this->assertStringNotContainsString('width="533"', $post1->parsed_content);
+        $this->assertStringNotContainsString('height="400"', $post1->parsed_content);
 
         $post2 = Post::find(2);
-        $this->assertStringNotContainsString('data-image-dimension-failed="1"', $post2->content);
+        $this->assertStringNotContainsString('data-image-dimension-failed="1"', $post2->parsed_content);
 
         // Verify post 3 was untouched
         $post3 = Post::find(3);
-        $this->assertEquals('<r><p>Just some text.</p></r>', $post3->content);
+        $this->assertEquals('<r><p>Just some text.</p></r>', $post3->parsed_content);
     }
 }
