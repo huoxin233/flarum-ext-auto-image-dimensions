@@ -95,16 +95,36 @@ class FetchImageDimensionsJob extends AbstractJob
                     return false;
                 }
 
-                if (! $proxy) {
-                    if (isset($parsed['host'])) {
-                        $ip = gethostbyname($parsed['host']);
-                        if ($ip === $parsed['host'] && ! filter_var($ip, FILTER_VALIDATE_IP)) {
-                            return false; // DNS failed
-                        }
+                $ip = null;
+                if (! $proxy && isset($parsed['host'])) {
+                    // Check if host is already an IP
+                    if (filter_var($parsed['host'], FILTER_VALIDATE_IP)) {
+                        $ip = $parsed['host'];
                         if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                            return false; // SSRF blocked (Private/Reserved IP)
+                            return false; // Direct SSRF
                         }
+                    } else {
+                        // Resolve both IPv4 and IPv6 to patch IPv6 loopback bypasses
+                        $records = dns_get_record($parsed['host'], DNS_A | DNS_AAAA);
+                        $validIp = null;
+                        if ($records !== false) {
+                            foreach ($records as $record) {
+                                $recordIp = $record['ip'] ?? $record['ipv6'] ?? null;
+                                if ($recordIp && filter_var($recordIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                                    $validIp = $recordIp;
+                                    break;
+                                }
+                            }
+                        }
+                        if (! $validIp) {
+                            return false; // SSRF blocked (no public IPs found)
+                        }
+                        $ip = $validIp;
                     }
+
+                    // Rewrite SRC to use the verified IP to physically prevent DNS Rebinding (TOCTOU)
+                    $urlIp = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? "[$ip]" : $ip;
+                    $src = $parsed['scheme'] . '://' . $urlIp . (isset($parsed['port']) ? ':' . $parsed['port'] : '') . ($parsed['path'] ?? '/') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
                 }
 
                 $fastImageSize = new FastImageSize();
@@ -116,6 +136,17 @@ class FetchImageDimensionsJob extends AbstractJob
                             'request_fulluri' => true,
                             'timeout' => 5.0,
                         ],
+                    ]);
+                } elseif (isset($parsed['host']) && $ip !== null) {
+                    $fastImageSize->setStreamContextOptions([
+                        'http' => [
+                            'header' => "Host: {$parsed['host']}\r\n",
+                            'timeout' => 5.0,
+                            'follow_location' => 0,
+                        ],
+                        'ssl' => [
+                            'peer_name' => $parsed['host'],
+                        ]
                     ]);
                 }
 
