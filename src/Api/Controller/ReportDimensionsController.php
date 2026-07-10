@@ -37,10 +37,6 @@ class ReportDimensionsController implements RequestHandlerInterface
 
         $actor->assertCan('huoxin-auto-image-dimensions.report');
 
-        if ($actor->isGuest()) {
-            return new EmptyResponse(403);
-        }
-
         if ($this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client') === 'backend') {
             return new EmptyResponse(204);
         }
