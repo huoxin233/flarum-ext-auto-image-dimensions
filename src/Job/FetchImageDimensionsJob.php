@@ -162,14 +162,29 @@ class FetchImageDimensionsJob extends AbstractJob
             return false;
         }, $this->forceRetry, $maxHeight);
 
+        $query = Post::where('id', $post->id);
+        if ($post->edited_at) {
+            $query->where('edited_at', $post->edited_at);
+        } else {
+            $query->whereNull('edited_at');
+        }
+
+        $updatedRows = 1;
         if ($newXml !== false) {
-            $query = Post::where('id', $post->id);
-            if ($post->edited_at) {
-                $query->where('edited_at', $post->edited_at);
-            } else {
-                $query->whereNull('edited_at');
+            $updatedRows = $query->update(['content' => $newXml]);
+        } else {
+            // If no XML changes were needed, we must still ensure the post wasn't
+            // concurrently edited before we modify the tracking table.
+            if (! $query->exists()) {
+                $updatedRows = 0;
             }
-            $query->update(['content' => $newXml]);
+        }
+
+        // If updatedRows === 0, it means the optimistic lock failed because the user
+        // concurrently edited the post. In this case, another job has already been queued
+        // by the Revised listener, so we should abort without modifying the tracking table.
+        if ($updatedRows === 0) {
+            return;
         }
 
         $finalXml = $newXml !== false ? $newXml : $xml;
