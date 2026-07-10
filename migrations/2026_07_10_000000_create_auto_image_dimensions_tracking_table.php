@@ -14,7 +14,6 @@ return [
                 $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
                 $table->index('has_failed');
             });
-
         }
     },
     'down' => function (Builder $schema) {
