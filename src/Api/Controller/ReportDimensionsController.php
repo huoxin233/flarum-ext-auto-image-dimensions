@@ -92,13 +92,14 @@ class ReportDimensionsController implements RequestHandlerInterface
         // Inject dimensions (ImageXmlProcessor auto-skips if dimensions exist)
         $maxHeight = (int) $this->settings->get('huoxin-auto-image-dimensions.max_height', 400);
 
-        $newXml = $this->processor->process($post->parsed_content, function (string $src) use ($imageMap) {
+        $requestHost = $request->getUri()->getHost();
+
+        $newXml = $this->processor->process($post->parsed_content, function (string $src) use ($imageMap, $requestHost) {
             // Exact match (absolute URLs)
             if (isset($imageMap[$src])) {
                 return $imageMap[$src];
             }
             // Fallback for relative URLs stored in XML (browser always reports absolute URLs)
-            $requestHost = $request->getUri()->getHost();
             foreach ($imageMap as $reportedUrl => $dims) {
                 if (str_ends_with($reportedUrl, $src)) {
                     // Prevent dimension spoofing by ensuring the reported URL originates from this request's exact domain
