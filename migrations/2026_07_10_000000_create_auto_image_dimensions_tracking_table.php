@@ -10,7 +10,7 @@ return [
                 $table->integer('post_id')->unsigned()->primary();
                 $table->boolean('has_failed')->default(false);
                 $table->timestamp('last_attempt_at')->nullable();
-                
+
                 $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
                 $table->index('has_failed');
             });
@@ -29,7 +29,7 @@ return [
                             'last_attempt_at' => null
                         ];
                     }
-                    if (!empty($insertData)) {
+                    if (! empty($insertData)) {
                         $schema->getConnection()->table('auto_image_dimensions_tracking')->insert($insertData);
                     }
                 });

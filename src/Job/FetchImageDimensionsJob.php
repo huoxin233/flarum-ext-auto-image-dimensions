@@ -124,7 +124,7 @@ class FetchImageDimensionsJob extends AbstractJob
 
                     // Rewrite SRC to use the verified IP to physically prevent DNS Rebinding (TOCTOU)
                     $urlIp = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? "[$ip]" : $ip;
-                    $src = $parsed['scheme'] . '://' . $urlIp . (isset($parsed['port']) ? ':' . $parsed['port'] : '') . ($parsed['path'] ?? '/') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+                    $src = $parsed['scheme'].'://'.$urlIp.(isset($parsed['port']) ? ':'.$parsed['port'] : '').($parsed['path'] ?? '/').(isset($parsed['query']) ? '?'.$parsed['query'] : '');
                 }
 
                 $fastImageSize = new FastImageSize();

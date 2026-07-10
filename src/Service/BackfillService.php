@@ -14,7 +14,6 @@ namespace Huoxin\AutoImageDimensions\Service;
 use Flarum\Post\CommentPost;
 use Huoxin\AutoImageDimensions\Job\FetchImageDimensionsJob;
 use Illuminate\Contracts\Queue\Queue;
-use Illuminate\Database\Capsule\Manager as DB;
 
 class BackfillService
 {
