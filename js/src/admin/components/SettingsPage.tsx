@@ -18,8 +18,8 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
               help: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_help'),
               type: 'select',
               options: {
-                backend: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_backend'),
                 client: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_client'),
+                backend: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_backend'),
                 hybrid: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_hybrid'),
               },
               default: 'client',
