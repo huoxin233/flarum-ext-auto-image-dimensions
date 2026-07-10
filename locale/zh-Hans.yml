@@ -17,8 +17,8 @@ huoxin-auto-image-dimensions:
     retry_mode_failed_only: 仅处理失败的图片
     manual_trigger_label: 手动触发队列
     manual_trigger_help: 立即加入后台任务队列，为帖子提取图片尺寸。
-    trigger_all_button: 队列所有缺失图片
-    trigger_failed_button: 队列仅失败图片
+    trigger_all_button: 处理所有缺失图片
+    trigger_failed_button: 仅处理失败图片
     trigger_confirm_text: 您确定要将这些任务加入队列吗？这将在后台运行。
     trigger_success: 成功将 {count} 个任务加入队列！
     trigger_error: 触发后台任务队列时发生错误。
@@ -26,7 +26,7 @@ huoxin-auto-image-dimensions:
     proxy_label: HTTP 代理 (SSRF 防护)
     proxy_help: "通过内部代理路由后端的图片尺寸请求，以隐藏您服务器的真实 IP (例如 tcp://10.0.0.5:3128)。强烈建议使用代理以防止高级 SSRF（DNS 重绑定）攻击！留空则仅使用基础的 PHP IP 过滤防护。"
     max_height_label: 最大图片高度
-    max_height_help: "为图片设置一个数学高度限制（例如 400）。扩展将按比例缩小宽度以保持纵横比，而不会破坏布局限制。设置为 0 以禁用。"
+    max_height_help: "为图片设置一个最大高度限制（例如 400）。扩展将按比例缩小宽度以保持图片原有纵横比，确保不会破坏页面布局。设置为 0 以禁用。"
     permissions:
       refresh_label: 允许刷新帖子图片尺寸
       report_label: 允许上报客户端图片尺寸
