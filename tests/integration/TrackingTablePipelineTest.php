@@ -2,10 +2,8 @@
 
 namespace Huoxin\AutoImageDimensions\Tests\Integration;
 
-use Flarum\Post\CommentPost;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use Flarum\User\User;
 use Illuminate\Database\ConnectionInterface;
 
 class TrackingTablePipelineTest extends TestCase
@@ -15,10 +13,10 @@ class TrackingTablePipelineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->extension('flarum-markdown');
         $this->extension('huoxin-auto-image-dimensions');
-        
+
         $this->prepareDatabase([
             'users' => [
                 $this->normalUser(),
@@ -35,7 +33,7 @@ class TrackingTablePipelineTest extends TestCase
     public function test_listener_adds_post_to_tracking_table_on_edit()
     {
         $db = $this->app()->getContainer()->make(ConnectionInterface::class);
-        
+
         // Ensure tracking table is empty
         $db->table('auto_image_dimensions_tracking')->delete();
 
@@ -56,7 +54,7 @@ class TrackingTablePipelineTest extends TestCase
 
         // The listener should have caught the Revised event and added it to the tracking table
         $trackingRow = $db->table('auto_image_dimensions_tracking')->where('post_id', 1)->first();
-        
+
         $this->assertNotNull($trackingRow, 'Post was not added to the tracking table after edit.');
         $this->assertEquals(0, $trackingRow->has_failed, 'Initial tracking row should not be marked as failed.');
     }

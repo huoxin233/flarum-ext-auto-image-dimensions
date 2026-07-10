@@ -11,7 +11,6 @@
 
 namespace Huoxin\AutoImageDimensions\Listener;
 
-use Carbon\Carbon;
 use Flarum\Post\Event\Posted;
 use Flarum\Post\Event\Revised;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -84,6 +83,7 @@ class QueueImageDimensionsFetch
             $this->db->table('auto_image_dimensions_tracking')
                 ->where('post_id', $post->id)
                 ->delete();
+
             return;
         }
 

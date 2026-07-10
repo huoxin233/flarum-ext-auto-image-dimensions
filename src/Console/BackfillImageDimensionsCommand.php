@@ -54,6 +54,7 @@ class BackfillImageDimensionsCommand extends Command
         if ($mode === 'client' && ! $this->option('ignore-mode')) {
             $this->error('Aborted: Extension is configured to client mode. Backend backfilling is disabled.');
             $this->line('Hint: Use --ignore-mode to force the backfill to run anyway.');
+
             return 1;
         }
 

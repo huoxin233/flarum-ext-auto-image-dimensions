@@ -2,8 +2,8 @@
 
 namespace Huoxin\AutoImageDimensions\Tests\Integration;
 
-use Flarum\Testing\integration\TestCase;
 use Flarum\Formatter\Formatter;
+use Flarum\Testing\integration\TestCase;
 
 class S9eTagContractTest extends TestCase
 {
@@ -25,9 +25,9 @@ class S9eTagContractTest extends TestCase
     {
         $markdown = '![z-alt](https://example.com/image.png)';
         $xml = $this->formatter->parse($markdown);
-        
+
         $this->assertStringContainsString('<IMG ', $xml, 's9e TextFormatter contract violation: The compiled XML no longer contains uppercase <IMG tags. The auto-image-dimensions extension relies on this exact casing for tracking table lookups.');
-        
+
         // Assert that s9e natively sorts attributes alphabetically (alt before src)
         $this->assertStringContainsString('<IMG alt="z-alt" src="https://example.com/image.png"', $xml, 's9e TextFormatter contract violation: Attributes are no longer sorted alphabetically natively.');
     }
@@ -36,7 +36,7 @@ class S9eTagContractTest extends TestCase
     {
         $bbcode = '[img]https://example.com/image.png[/img]';
         $xml = $this->formatter->parse($bbcode);
-        
+
         $this->assertStringContainsString('<IMG ', $xml, 's9e TextFormatter contract violation for BBCode.');
     }
 }
