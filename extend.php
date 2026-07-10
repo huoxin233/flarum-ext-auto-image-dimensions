@@ -13,6 +13,7 @@ namespace Huoxin\AutoImageDimensions;
 
 use Flarum\Api\Serializer\PostSerializer;
 use Flarum\Extend;
+use Flarum\Frontend\Document;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Console\Scheduling\Event;
 use s9e\TextFormatter\Configurator;
@@ -23,7 +24,14 @@ return [
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/less/admin.less'),
     (new Extend\Frontend('forum'))
-        ->js(__DIR__.'/js/dist/forum.js'),
+        ->js(__DIR__.'/js/dist/forum.js')
+        ->content(function (Document $document) {
+            $settings = resolve(SettingsRepositoryInterface::class);
+            $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
+            if ($maxHeight > 0) {
+                $document->head[] = '<style>.ComposerBody-preview img,.Post.editing .Post-body img{max-height:'.$maxHeight.'px}.ComposerBody-preview img:not([width]),.Post.editing .Post-body img:not([width]){width:auto}</style>';
+            }
+        }),
     new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Settings())
