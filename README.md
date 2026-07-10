@@ -25,6 +25,9 @@ Install with composer:
 composer require huoxin/auto-image-dimensions:"*"
 ```
 
+> **Installation Note for Backend Mode:** 
+> If you plan to use **Backend** or **Hybrid** mode on an existing forum, the extension will NOT automatically fetch dimensions for your old posts during installation (to prevent server timeout crashes). After enabling the extension, please go to the extension's settings page and click the **"Trigger All"** button, or safely queue your old posts via the terminal by running: `php flarum auto-image-dimensions:backfill`. (If you exclusively use Client mode, no action is required).
+
 ## CLI Commands
 
 If you have thousands of existing posts, you can manually trigger a backfill from the command line:

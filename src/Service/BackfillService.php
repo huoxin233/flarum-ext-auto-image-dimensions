@@ -32,15 +32,16 @@ class BackfillService
 
     protected function buildQuery(bool $failedOnly)
     {
-        $query = CommentPost::query()
-            ->join('auto_image_dimensions_tracking', 'posts.id', '=', 'auto_image_dimensions_tracking.post_id')
-            ->select('posts.id', 'posts.edited_at');
-
         if ($failedOnly) {
-            $query->where('auto_image_dimensions_tracking.has_failed', 1);
+            return CommentPost::query()
+                ->join('auto_image_dimensions_tracking', 'posts.id', '=', 'auto_image_dimensions_tracking.post_id')
+                ->where('auto_image_dimensions_tracking.has_failed', 1)
+                ->select('posts.id', 'posts.edited_at');
         }
 
-        return $query;
+        return CommentPost::query()
+            ->where('content', 'LIKE', '%<IMG %')
+            ->select('id', 'edited_at');
     }
 
     /**
