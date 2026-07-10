@@ -36,9 +36,7 @@ return [
 
     (new Extend\Settings())
         ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client')
-        ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', null, 400),
-
-    (new Extend\Settings())
+        ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', null, 400)
         ->default('huoxin-auto-image-dimensions.operating_mode', 'client')
         ->default('huoxin-auto-image-dimensions.max_height', 400)
         ->default('huoxin-auto-image-dimensions.schedule_interval', 'disabled')
