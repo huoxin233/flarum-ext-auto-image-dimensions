@@ -24,9 +24,11 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
     const postId = post.id();
     if (!postId) return;
 
-    // Find all images in this post
+    // Find all images in this post, explicitly excluding emojis and 3rd party extension injections
     const element = this.element as HTMLElement;
-    const images = element.querySelectorAll<HTMLImageElement>('.Post-body img');
+    const images = element.querySelectorAll<HTMLImageElement>(
+      '.Post-body img:not(.emoji):not(.flamoji):not(.catchthefish-image):not([data-link-preview])'
+    );
 
     let batchedImages: { url: string; width: number; height: number }[] = [];
     let debounceTimer: number | null = null;
