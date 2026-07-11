@@ -30,10 +30,10 @@ class RefreshPostDimensionsController implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
-        $actor->assertCan('huoxin-auto-image-dimensions.refresh');
-
         $postId = Arr::get($request->getQueryParams(), 'id');
-        $post = Post::findOrFail($postId);
+        $post = Post::whereVisibleTo($actor)->findOrFail($postId);
+
+        $actor->assertCan('huoxin-auto-image-dimensions.refresh');
 
         if (! $post->parsed_content) {
             return new EmptyResponse(204);

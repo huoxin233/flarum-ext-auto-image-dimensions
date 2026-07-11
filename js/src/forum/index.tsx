@@ -11,11 +11,12 @@ import type Mithril from 'mithril';
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   // We extend oncreate to run whenever a post is rendered in the DOM
   extend(CommentPost.prototype, 'oncreate', function (this: CommentPost, val: void, vnode: Mithril.VnodeDOM<any, CommentPost>) {
-    // Only allow logged-in users to report dimensions
-    if (!app.session || !app.session.user) return;
-
     const mode = app.forum.attribute<string>('huoxinAutoImageDimensionsMode') || 'client';
     if (mode === 'backend') return;
+
+    // Only allow logged-in users with permission to report dimensions
+    if (!app.session || !app.session.user) return;
+    if (!app.forum.attribute<boolean>('canReportImageDimensions')) return;
 
     const post = this.attrs.post;
     if (!post) return;

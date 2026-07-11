@@ -35,8 +35,6 @@ class ReportDimensionsController implements RequestHandlerInterface
     {
         $actor = RequestUtil::getActor($request);
 
-        $actor->assertCan('huoxin-auto-image-dimensions.report');
-
         if ($this->settings->get('huoxin-auto-image-dimensions.operating_mode', 'client') === 'backend') {
             return new EmptyResponse(204);
         }
@@ -80,14 +78,12 @@ class ReportDimensionsController implements RequestHandlerInterface
         }
 
         /** @var Post|null $post */
-        $post = Post::find($postId);
+        $post = Post::whereVisibleTo($actor)->find($postId);
         if (! $post || ! $post->parsed_content) {
             return new EmptyResponse(204);
         }
 
-        if ($actor->cannot('view', $post)) {
-            return new EmptyResponse(403);
-        }
+        $actor->assertCan('huoxin-auto-image-dimensions.report');
 
         // Inject dimensions (ImageXmlProcessor auto-skips if dimensions exist)
         $maxHeight = (int) $this->settings->get('huoxin-auto-image-dimensions.max_height', 400);

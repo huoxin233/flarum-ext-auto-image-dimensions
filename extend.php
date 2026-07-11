@@ -11,6 +11,7 @@
 
 namespace Huoxin\AutoImageDimensions;
 
+use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Api\Serializer\PostSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
@@ -98,6 +99,11 @@ return [
     (new Extend\ApiSerializer(PostSerializer::class))
         ->attribute('canRefreshImageDimensions', function ($serializer, $post) {
             return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh');
+        }),
+
+    (new Extend\ApiSerializer(ForumSerializer::class))
+        ->attribute('canReportImageDimensions', function ($serializer) {
+            return $serializer->getActor()->can('huoxin-auto-image-dimensions.report');
         }),
 
     (new Extend\Formatter())
