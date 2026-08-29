@@ -27,11 +27,10 @@ return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
         ->content(function (Document $document) {
-            $settings = resolve(SettingsRepositoryInterface::class);
-            $maxHeight = (int) $settings->get('huoxin-auto-image-dimensions.max_height', 400);
-            if ($maxHeight > 0) {
-                $document->head[] = '<style>.ComposerBody-preview img,.Post.editing .Post-body img{max-height:'.$maxHeight.'px}.ComposerBody-preview img:not([width]),.Post.editing .Post-body img:not([width]){width:auto}</style>';
-            }
+            $maxHeight = (int) resolve(SettingsRepositoryInterface::class)->get('huoxin-auto-image-dimensions.max_height', 400);
+            $cssMaxHeight = $maxHeight > 0 ? "{$maxHeight}px" : 'none';
+
+            $document->head[] = "<style>:root{--post-img-max-height:{$cssMaxHeight};}.ComposerBody-preview img,.Post.editing .Post-body img,.Post-body img.FoFUpload--Upl-Image-Preview{max-height:var(--post-img-max-height);width:auto;height:auto;max-width:100%;}</style>";
         }),
     new Extend\Locales(__DIR__.'/locale'),
 
