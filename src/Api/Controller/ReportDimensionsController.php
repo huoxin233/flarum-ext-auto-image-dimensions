@@ -16,7 +16,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class ReportDimensionsController implements RequestHandlerInterface
 {
-    private const MAX_DIM = 16384;
+    private const MAX_DIM = 100000;
     private const RATE_LIMIT_WINDOW = 60;
     private const RATE_LIMIT_MAX = 60;
 

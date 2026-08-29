@@ -68,4 +68,51 @@ class ReportDimensionsTest extends TestCase
         $this->assertStringContainsString('width="533"', $post->parsed_content);
         $this->assertStringContainsString('height="400"', $post->parsed_content);
     }
+
+    public function test_user_can_report_large_stitched_screenshot()
+    {
+        $response = $this->send(
+            $this->request('POST', '/api/auto-image-dimensions/report', [
+                'authenticatedAs' => 1,
+                'json' => [
+                    'post_id' => 1,
+                    'images' => [
+                        [
+                            'url' => 'https://example.com/img.png',
+                            'width' => 1950,
+                            'height' => 20640,
+                        ],
+                    ],
+                ],
+            ])
+        );
+
+        $this->assertEquals(204, $response->getStatusCode());
+
+        $this->app();
+        $post = Post::find(1);
+        $this->assertStringContainsString('width="38"', $post->parsed_content);
+        $this->assertStringContainsString('height="400"', $post->parsed_content);
+    }
+
+    public function test_rejects_exceeding_max_dim()
+    {
+        $response = $this->send(
+            $this->request('POST', '/api/auto-image-dimensions/report', [
+                'authenticatedAs' => 1,
+                'json' => [
+                    'post_id' => 1,
+                    'images' => [
+                        [
+                            'url' => 'https://example.com/img.png',
+                            'width' => 1950,
+                            'height' => 100001,
+                        ],
+                    ],
+                ],
+            ])
+        );
+
+        $this->assertEquals(422, $response->getStatusCode());
+    }
 }
