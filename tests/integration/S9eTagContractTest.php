@@ -4,6 +4,7 @@ namespace Huoxin\AutoImageDimensions\Tests\Integration;
 
 use Flarum\Formatter\Formatter;
 use Flarum\Testing\integration\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class S9eTagContractTest extends TestCase
 {
@@ -21,7 +22,8 @@ class S9eTagContractTest extends TestCase
         $this->formatter = $this->app()->getContainer()->make(Formatter::class);
     }
 
-    public function test_s9e_compiles_images_to_uppercase_img_tag()
+    #[Test]
+    public function test_s9e_compiles_images_to_uppercase_img_tag(): void
     {
         $markdown = '![z-alt](https://example.com/image.png)';
         $xml = $this->formatter->parse($markdown);
@@ -32,7 +34,8 @@ class S9eTagContractTest extends TestCase
         $this->assertStringContainsString('<IMG alt="z-alt" src="https://example.com/image.png"', $xml, 's9e TextFormatter contract violation: Attributes are no longer sorted alphabetically natively.');
     }
 
-    public function test_s9e_compiles_bbcode_images_to_uppercase_img_tag()
+    #[Test]
+    public function test_s9e_compiles_bbcode_images_to_uppercase_img_tag(): void
     {
         $bbcode = '[img]https://example.com/image.png[/img]';
         $xml = $this->formatter->parse($bbcode);

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
 use Flarum\Testing\integration\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class DatabaseOptimisticLockingTest extends TestCase
 {
@@ -19,7 +20,8 @@ class DatabaseOptimisticLockingTest extends TestCase
         ]);
     }
 
-    public function test_optimistic_locking_prevents_stale_overwrites()
+    #[Test]
+    public function test_optimistic_locking_prevents_stale_overwrites(): void
     {
         $this->app();
 

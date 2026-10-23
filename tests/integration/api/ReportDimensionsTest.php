@@ -8,6 +8,7 @@ use Flarum\Post\Post;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\User;
+use PHPUnit\Framework\Attributes\Test;
 
 class ReportDimensionsTest extends TestCase
 {
@@ -45,7 +46,8 @@ class ReportDimensionsTest extends TestCase
         ]);
     }
 
-    public function test_user_can_report_dimensions()
+    #[Test]
+    public function test_user_can_report_dimensions(): void
     {
         $response = $this->send(
             $this->request('POST', '/api/auto-image-dimensions/report', [
@@ -71,7 +73,8 @@ class ReportDimensionsTest extends TestCase
         $this->assertStringContainsString('height="400"', $post->parsed_content);
     }
 
-    public function test_user_can_report_large_stitched_screenshot()
+    #[Test]
+    public function test_user_can_report_large_stitched_screenshot(): void
     {
         $response = $this->send(
             $this->request('POST', '/api/auto-image-dimensions/report', [
@@ -97,7 +100,8 @@ class ReportDimensionsTest extends TestCase
         $this->assertStringContainsString('height="400"', $post->parsed_content);
     }
 
-    public function test_rejects_exceeding_max_dim()
+    #[Test]
+    public function test_rejects_exceeding_max_dim(): void
     {
         $response = $this->send(
             $this->request('POST', '/api/auto-image-dimensions/report', [
@@ -116,5 +120,18 @@ class ReportDimensionsTest extends TestCase
         );
 
         $this->assertEquals(422, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function test_can_report_image_dimensions_serialized_correctly(): void
+    {
+        $response = $this->send(
+            $this->request('GET', '/api', [
+                'authenticatedAs' => 1,
+            ])
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertTrue($payload['data']['attributes']['canReportImageDimensions']);
     }
 }

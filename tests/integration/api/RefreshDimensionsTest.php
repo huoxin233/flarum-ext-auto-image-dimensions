@@ -8,6 +8,7 @@ use Flarum\Post\Post;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\User;
+use PHPUnit\Framework\Attributes\Test;
 
 class RefreshDimensionsTest extends TestCase
 {
@@ -46,7 +47,8 @@ class RefreshDimensionsTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_refresh_dimensions()
+    #[Test]
+    public function test_admin_can_refresh_dimensions(): void
     {
         $response = $this->send(
             $this->request('POST', '/api/posts/1/refresh-image-dimensions', [
@@ -67,7 +69,8 @@ class RefreshDimensionsTest extends TestCase
         $this->assertStringContainsString('data-image-dimension-failed="1"', $post->parsed_content);
     }
 
-    public function test_normal_user_cannot_refresh_dimensions()
+    #[Test]
+    public function test_normal_user_cannot_refresh_dimensions(): void
     {
         $response = $this->send(
             $this->request('POST', '/api/posts/1/refresh-image-dimensions', [
@@ -82,5 +85,27 @@ class RefreshDimensionsTest extends TestCase
         $post = Post::find(1);
         // Attributes should NOT be stripped
         $this->assertStringContainsString('width="533"', $post->parsed_content);
+    }
+
+    #[Test]
+    public function test_can_refresh_image_dimensions_serialized_correctly(): void
+    {
+        $adminResponse = $this->send(
+            $this->request('GET', '/api/posts/1', [
+                'authenticatedAs' => 1,
+            ])
+        );
+        $this->assertEquals(200, $adminResponse->getStatusCode());
+        $adminPayload = json_decode((string) $adminResponse->getBody(), true);
+        $this->assertTrue($adminPayload['data']['attributes']['canRefreshImageDimensions']);
+
+        $userResponse = $this->send(
+            $this->request('GET', '/api/posts/1', [
+                'authenticatedAs' => 2,
+            ])
+        );
+        $this->assertEquals(200, $userResponse->getStatusCode());
+        $userPayload = json_decode((string) $userResponse->getBody(), true);
+        $this->assertFalse($userPayload['data']['attributes']['canRefreshImageDimensions']);
     }
 }

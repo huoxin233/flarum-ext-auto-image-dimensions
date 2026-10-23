@@ -8,6 +8,7 @@ use Flarum\Post\Post;
 use Flarum\Testing\integration\ConsoleTestCase;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\User\User;
+use PHPUnit\Framework\Attributes\Test;
 
 class ClearDimensionsCommandTest extends ConsoleTestCase
 {
@@ -55,7 +56,8 @@ class ClearDimensionsCommandTest extends ConsoleTestCase
         ]);
     }
 
-    public function test_it_clears_dimensions_from_all_posts()
+    #[Test]
+    public function test_it_clears_dimensions_from_all_posts(): void
     {
         $output = $this->runCommand(['command' => 'auto-image-dimensions:clear-all', '--force' => true]);
 

@@ -8,6 +8,7 @@ use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\User;
 use Illuminate\Database\ConnectionInterface;
+use PHPUnit\Framework\Attributes\Test;
 
 class TrackingTablePipelineTest extends TestCase
 {
@@ -33,7 +34,8 @@ class TrackingTablePipelineTest extends TestCase
         ]);
     }
 
-    public function test_listener_adds_post_to_tracking_table_on_edit()
+    #[Test]
+    public function test_listener_adds_post_to_tracking_table_on_edit(): void
     {
         $db = $this->app()->getContainer()->make(ConnectionInterface::class);
 
@@ -44,12 +46,15 @@ class TrackingTablePipelineTest extends TestCase
         $response = $this->send(
             $this->request('PATCH', '/api/posts/1', [
                 'authenticatedAs' => 2,
-            ])->withParsedBody([
-                'data' => [
-                    'attributes' => [
-                        'content' => 'Now it has an image: ![alt](https://example.com/img.png)'
-                    ]
-                ]
+                'json' => [
+                    'data' => [
+                        'type' => 'posts',
+                        'id' => '1',
+                        'attributes' => [
+                            'content' => 'Now it has an image: ![alt](https://example.com/img.png)',
+                        ],
+                    ],
+                ],
             ])
         );
 
