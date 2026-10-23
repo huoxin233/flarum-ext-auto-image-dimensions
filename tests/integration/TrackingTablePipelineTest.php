@@ -2,6 +2,7 @@
 
 namespace Huoxin\AutoImageDimensions\Tests\Integration;
 
+use Carbon\Carbon;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
@@ -29,7 +30,14 @@ class TrackingTablePipelineTest extends TestCase
                 ['id' => 1, 'title' => 'Test Discussion', 'user_id' => 2, 'comment_count' => 1],
             ],
             Post::class => [
-                ['id' => 1, 'discussion_id' => 1, 'user_id' => 2, 'type' => 'comment', 'content' => '<t><p>No image here</p></t>'],
+                [
+                    'id' => 1,
+                    'discussion_id' => 1,
+                    'user_id' => 2,
+                    'type' => 'comment',
+                    'content' => '<t><p>No image here</p></t>',
+                    'created_at' => Carbon::now()->subMinute()->toDateTimeString(),
+                ],
             ]
         ]);
     }
