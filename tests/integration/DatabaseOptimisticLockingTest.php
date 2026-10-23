@@ -3,6 +3,7 @@
 namespace Huoxin\AutoImageDimensions\Tests\integration;
 
 use Carbon\Carbon;
+use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
 use Flarum\Testing\integration\TestCase;
 
@@ -13,8 +14,8 @@ class DatabaseOptimisticLockingTest extends TestCase
         parent::setUp();
         $this->extension('huoxin-auto-image-dimensions');
         $this->prepareDatabase([
-            'discussions' => [['id' => 1, 'title' => 'test', 'created_at' => Carbon::now()->toDateTimeString(), 'user_id' => 1]],
-            'posts' => [['id' => 1, 'discussion_id' => 1, 'user_id' => 1, 'type' => 'comment', 'content' => '<r><p>original</p></r>', 'edited_at' => null]],
+            Discussion::class => [['id' => 1, 'title' => 'test', 'created_at' => Carbon::now()->toDateTimeString(), 'user_id' => 1]],
+            Post::class => [['id' => 1, 'discussion_id' => 1, 'user_id' => 1, 'type' => 'comment', 'content' => '<r><p>original</p></r>', 'edited_at' => null]],
         ]);
     }
 

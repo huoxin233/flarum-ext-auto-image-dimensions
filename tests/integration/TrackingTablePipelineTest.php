@@ -2,8 +2,11 @@
 
 namespace Huoxin\AutoImageDimensions\Tests\Integration;
 
+use Flarum\Discussion\Discussion;
+use Flarum\Post\Post;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use Flarum\User\User;
 use Illuminate\Database\ConnectionInterface;
 
 class TrackingTablePipelineTest extends TestCase
@@ -18,13 +21,13 @@ class TrackingTablePipelineTest extends TestCase
         $this->extension('huoxin-auto-image-dimensions');
 
         $this->prepareDatabase([
-            'users' => [
+            User::class => [
                 $this->normalUser(),
             ],
-            'discussions' => [
+            Discussion::class => [
                 ['id' => 1, 'title' => 'Test Discussion', 'user_id' => 2, 'comment_count' => 1],
             ],
-            'posts' => [
+            Post::class => [
                 ['id' => 1, 'discussion_id' => 1, 'user_id' => 2, 'type' => 'comment', 'content' => '<t><p>No image here</p></t>'],
             ]
         ]);

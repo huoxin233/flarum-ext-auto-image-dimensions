@@ -3,9 +3,11 @@
 namespace Huoxin\AutoImageDimensions\Tests\integration\console;
 
 use Carbon\Carbon;
+use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
 use Flarum\Testing\integration\ConsoleTestCase;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
+use Flarum\User\User;
 
 class ClearDimensionsCommandTest extends ConsoleTestCase
 {
@@ -18,13 +20,13 @@ class ClearDimensionsCommandTest extends ConsoleTestCase
         $this->extension('huoxin-auto-image-dimensions');
 
         $this->prepareDatabase([
-            'users' => [
+            User::class => [
                 ['id' => 1, 'username' => 'Mural', 'email' => 'mural@machine.local', 'is_email_confirmed' => 1],
             ],
-            'discussions' => [
+            Discussion::class => [
                 ['id' => 1, 'title' => __CLASS__, 'created_at' => Carbon::now()->toDateTimeString(), 'user_id' => 1],
             ],
-            'posts' => [
+            Post::class => [
                 [
                     'id' => 1,
                     'discussion_id' => 1,

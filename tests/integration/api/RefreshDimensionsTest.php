@@ -3,9 +3,11 @@
 namespace Huoxin\AutoImageDimensions\Tests\integration\api;
 
 use Carbon\Carbon;
+use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use Flarum\User\User;
 
 class RefreshDimensionsTest extends TestCase
 {
@@ -20,7 +22,7 @@ class RefreshDimensionsTest extends TestCase
         $this->setting('huoxin-auto-image-dimensions.operating_mode', 'backend');
 
         $this->prepareDatabase([
-            'users' => [
+            User::class => [
                 ['id' => 1, 'username' => 'Mural', 'email' => 'mural@machine.local', 'is_email_confirmed' => 1],
                 // ID 2 is a normal user
                 ['id' => 2, 'username' => 'Normal', 'email' => 'normal@machine.local', 'is_email_confirmed' => 1],
@@ -28,10 +30,10 @@ class RefreshDimensionsTest extends TestCase
             'group_user' => [
                 ['user_id' => 1, 'group_id' => 1], // Admin
             ],
-            'discussions' => [
+            Discussion::class => [
                 ['id' => 1, 'title' => __CLASS__, 'created_at' => Carbon::now()->toDateTimeString(), 'user_id' => 1],
             ],
-            'posts' => [
+            Post::class => [
                 [
                     'id' => 1,
                     'discussion_id' => 1,
