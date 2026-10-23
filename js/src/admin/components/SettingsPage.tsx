@@ -84,7 +84,7 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
                 <div className="Form-group">
                   <label>{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_label')}</label>
                   <div className="helpText">{app.translator.trans('huoxin-auto-image-dimensions.admin.manual_trigger_help')}</div>
-                  <div style="display: flex; gap: 10px; margin-top: 10px;">
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                     <button className="Button Button--primary" onclick={() => this.triggerBackfill('all')}>
                       {app.translator.trans('huoxin-auto-image-dimensions.admin.trigger_all_button')}
                     </button>

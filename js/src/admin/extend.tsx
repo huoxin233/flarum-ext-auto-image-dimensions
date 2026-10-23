@@ -2,7 +2,7 @@ import Extend from 'flarum/common/extenders';
 import app from 'flarum/admin/app';
 import SettingsPage from './components/SettingsPage';
 
-export default [
+const extenders = [
   new Extend.Admin()
     .page(SettingsPage)
     .permission(
@@ -24,3 +24,5 @@ export default [
       90
     ),
 ];
+
+export default extenders;
