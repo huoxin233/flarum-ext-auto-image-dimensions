@@ -95,11 +95,13 @@ return [
         ->post('/auto-image-dimensions/report', 'auto-image-dimensions.report', Api\Controller\ReportDimensionsController::class)
         ->post('/posts/{id}/refresh-image-dimensions', 'posts.refresh-image-dimensions', Api\Controller\RefreshPostDimensionsController::class),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiSerializer(PostSerializer::class))
         ->attribute('canRefreshImageDimensions', function ($serializer, $post) {
             return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh');
         }),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiSerializer(ForumSerializer::class))
         ->attribute('canReportImageDimensions', function ($serializer) {
             return $serializer->getActor()->can('huoxin-auto-image-dimensions.report');
