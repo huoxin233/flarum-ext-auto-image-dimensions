@@ -1,3 +1,4 @@
+import Form from 'flarum/common/components/Form';
 import ExtensionPage, { ExtensionPageAttrs } from 'flarum/admin/components/ExtensionPage';
 import type Mithril from 'mithril';
 import app from 'flarum/admin/app';
@@ -11,17 +12,19 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
     return (
       <div className="ExtensionPage-settings AutoImageDimensionsSettingsPage">
         <div className="container">
-          <div className="Form">
+          <Form>
             {this.buildSettingComponent({
               setting: 'huoxin-auto-image-dimensions.operating_mode',
               label: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_label'),
               help: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_help'),
               type: 'select',
+
               options: {
                 client: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_client'),
                 backend: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_backend'),
                 hybrid: app.translator.trans('huoxin-auto-image-dimensions.admin.operating_mode_hybrid'),
               },
+
               default: 'client',
             })}
             {this.buildSettingComponent({
@@ -39,12 +42,14 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
                   label: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_label'),
                   help: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_help'),
                   type: 'select',
+
                   options: {
                     disabled: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_disabled'),
                     daily: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_daily'),
                     weekly: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_weekly'),
                     monthly: app.translator.trans('huoxin-auto-image-dimensions.admin.schedule_interval_monthly'),
                   },
+
                   default: 'disabled',
                 })}
                 {this.buildSettingComponent({
@@ -52,10 +57,12 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
                   label: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_label'),
                   help: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_help'),
                   type: 'select',
+
                   options: {
                     failed_only: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_failed_only'),
                     all: app.translator.trans('huoxin-auto-image-dimensions.admin.retry_mode_all'),
                   },
+
                   default: 'failed_only',
                 })}
                 {this.buildSettingComponent({
@@ -90,7 +97,7 @@ export default class SettingsPage extends ExtensionPage<ExtensionPageAttrs> {
             )}
 
             <div className="Form-group">{this.submitButton()}</div>
-          </div>
+          </Form>
         </div>
       </div>
     );

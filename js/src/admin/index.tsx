@@ -2,7 +2,7 @@ import app from 'flarum/admin/app';
 import SettingsPage from './components/SettingsPage';
 
 app.initializers.add('huoxin-auto-image-dimensions', () => {
-  app.extensionData
+  app.registry
     .for('huoxin-auto-image-dimensions')
     .registerPage(SettingsPage)
     .registerPermission(
