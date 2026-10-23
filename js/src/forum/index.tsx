@@ -4,9 +4,10 @@ import CommentPost from 'flarum/forum/components/CommentPost';
 import PostControls from 'flarum/forum/utils/PostControls';
 import ItemList from 'flarum/common/utils/ItemList';
 import Button from 'flarum/common/components/Button';
-import Model from 'flarum/common/Model';
 import Post from 'flarum/common/models/Post';
 import type Mithril from 'mithril';
+
+export { default as extend } from './extend';
 
 app.initializers.add('huoxin-auto-image-dimensions', () => {
   // We extend oncreate to run whenever a post is rendered in the DOM
@@ -96,8 +97,6 @@ app.initializers.add('huoxin-auto-image-dimensions', () => {
       }
     });
   });
-
-  Post.prototype.canRefreshImageDimensions = Model.attribute<boolean>('canRefreshImageDimensions');
 
   extend(PostControls, 'moderationControls', function (items: ItemList<Mithril.Children>, post: Post) {
     if (post.canRefreshImageDimensions()) {
