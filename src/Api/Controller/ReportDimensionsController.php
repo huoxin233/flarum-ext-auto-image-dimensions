@@ -20,15 +20,8 @@ class ReportDimensionsController implements RequestHandlerInterface
     private const RATE_LIMIT_WINDOW = 60;
     private const RATE_LIMIT_MAX = 60;
 
-    protected $cache;
-    protected $processor;
-    protected $settings;
-
-    public function __construct(Cache $cache, ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
+    public function __construct(protected Cache $cache, protected ImageXmlProcessor $processor, protected SettingsRepositoryInterface $settings)
     {
-        $this->cache = $cache;
-        $this->processor = $processor;
-        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

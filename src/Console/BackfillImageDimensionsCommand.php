@@ -27,25 +27,9 @@ class BackfillImageDimensionsCommand extends Command
      */
     protected $description = 'Queue old posts for image dimension extraction.';
 
-    /**
-     * @var BackfillService
-     */
-    protected $backfillService;
-
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    /**
-     * @param BackfillService $backfillService
-     * @param SettingsRepositoryInterface $settings
-     */
-    public function __construct(BackfillService $backfillService, SettingsRepositoryInterface $settings)
+    public function __construct(protected BackfillService $backfillService, protected SettingsRepositoryInterface $settings)
     {
         parent::__construct();
-        $this->backfillService = $backfillService;
-        $this->settings = $settings;
     }
 
     public function handle()

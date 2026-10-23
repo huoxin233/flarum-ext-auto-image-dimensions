@@ -17,17 +17,8 @@ use Illuminate\Contracts\Queue\Queue;
 
 class BackfillService
 {
-    /**
-     * @var Queue
-     */
-    protected $queue;
-
-    /**
-     * @param Queue $queue
-     */
-    public function __construct(Queue $queue)
+    public function __construct(protected Queue $queue)
     {
-        $this->queue = $queue;
     }
 
     protected function buildQuery(bool $failedOnly)

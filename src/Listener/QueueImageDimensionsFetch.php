@@ -21,31 +21,8 @@ use Illuminate\Database\ConnectionInterface;
 
 class QueueImageDimensionsFetch
 {
-    /**
-     * @var Queue
-     */
-    protected $queue;
-
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    /**
-     * @var ConnectionInterface
-     */
-    protected $db;
-
-    /**
-     * @param Queue $queue
-     * @param SettingsRepositoryInterface $settings
-     * @param ConnectionInterface $db
-     */
-    public function __construct(Queue $queue, SettingsRepositoryInterface $settings, ConnectionInterface $db)
+    public function __construct(protected Queue $queue, protected SettingsRepositoryInterface $settings, protected ConnectionInterface $db)
     {
-        $this->queue = $queue;
-        $this->settings = $settings;
-        $this->db = $db;
     }
 
     /**

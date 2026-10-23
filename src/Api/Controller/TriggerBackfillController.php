@@ -22,24 +22,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class TriggerBackfillController implements RequestHandlerInterface
 {
-    /**
-     * @var BackfillService
-     */
-    protected $backfillService;
-
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    /**
-     * @param BackfillService $backfillService
-     * @param SettingsRepositoryInterface $settings
-     */
-    public function __construct(BackfillService $backfillService, SettingsRepositoryInterface $settings)
+    public function __construct(protected BackfillService $backfillService, protected SettingsRepositoryInterface $settings)
     {
-        $this->backfillService = $backfillService;
-        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

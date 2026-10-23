@@ -16,15 +16,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class RefreshPostDimensionsController implements RequestHandlerInterface
 {
-    protected $queue;
-    protected $processor;
-    protected $settings;
-
-    public function __construct(Queue $queue, ImageXmlProcessor $processor, SettingsRepositoryInterface $settings)
+    public function __construct(protected Queue $queue, protected ImageXmlProcessor $processor, protected SettingsRepositoryInterface $settings)
     {
-        $this->queue = $queue;
-        $this->processor = $processor;
-        $this->settings = $settings;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

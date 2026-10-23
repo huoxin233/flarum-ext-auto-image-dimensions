@@ -22,38 +22,8 @@ use Illuminate\Database\ConnectionInterface;
 
 class FetchImageDimensionsJob extends AbstractJob
 {
-    /**
-     * @var int
-     */
-    protected $postId;
-
-    /**
-     * @var string|null
-     */
-    protected $editedAt;
-
-    /**
-     * @var bool
-     */
-    protected $forceRetry;
-
-    /**
-     * @var bool
-     */
-    protected $ignoreMode;
-
-    /**
-     * @param int $postId
-     * @param string|null $editedAt
-     * @param bool $forceRetry
-     * @param bool $ignoreMode
-     */
-    public function __construct(int $postId, ?string $editedAt, bool $forceRetry = false, bool $ignoreMode = false)
+    public function __construct(protected int $postId, protected ?string $editedAt, protected bool $forceRetry = false, protected bool $ignoreMode = false)
     {
-        $this->postId = $postId;
-        $this->editedAt = $editedAt;
-        $this->forceRetry = $forceRetry;
-        $this->ignoreMode = $ignoreMode;
     }
 
     public function handle(ImageXmlProcessor $processor, SettingsRepositoryInterface $settings, ConnectionInterface $db)
