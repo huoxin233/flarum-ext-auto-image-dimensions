@@ -30,11 +30,12 @@ return [
         ->css(__DIR__.'/less/admin.less'),
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
+        ->css(__DIR__.'/less/forum.less')
         ->content(function (Document $document) {
             $maxHeight = (int) resolve(SettingsRepositoryInterface::class)->get('huoxin-auto-image-dimensions.max_height', 400);
             $cssMaxHeight = $maxHeight > 0 ? "{$maxHeight}px" : 'none';
 
-            $document->head[] = "<style>:root{--post-img-max-height:{$cssMaxHeight};}.ComposerBody-preview img,.Post.editing .Post-body img,.Post-body img.FoFUpload--Upl-Image-Preview{max-height:var(--post-img-max-height);width:auto;height:auto;max-width:100%;}</style>";
+            $document->head[] = "<style>:root{--post-img-max-height:{$cssMaxHeight};}</style>";
         }),
     new Extend\Locales(__DIR__.'/locale'),
 
