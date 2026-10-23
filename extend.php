@@ -11,10 +11,14 @@
 
 namespace Huoxin\AutoImageDimensions;
 
-use Flarum\Api\Serializer\ForumSerializer;
-use Flarum\Api\Serializer\PostSerializer;
+use Flarum\Api\Context;
+use Flarum\Api\Resource\ForumResource;
+use Flarum\Api\Resource\PostResource;
+use Flarum\Api\Schema;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use Flarum\Post\Event\Posted;
+use Flarum\Post\Event\Revised;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Console\Scheduling\Event;
 use s9e\TextFormatter\Configurator;
@@ -35,8 +39,8 @@ return [
     new Extend\Locales(__DIR__.'/locale'),
 
     (new Extend\Settings())
-        ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode', null, 'client')
-        ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', null, 400)
+        ->serializeToForum('huoxinAutoImageDimensionsMode', 'huoxin-auto-image-dimensions.operating_mode')
+        ->serializeToForum('huoxinAutoImageDimensionsMaxHeight', 'huoxin-auto-image-dimensions.max_height', 'intval')
         ->default('huoxin-auto-image-dimensions.operating_mode', 'client')
         ->default('huoxin-auto-image-dimensions.max_height', 400)
         ->default('huoxin-auto-image-dimensions.schedule_interval', 'disabled')
@@ -44,7 +48,8 @@ return [
         ->default('huoxin-auto-image-dimensions.proxy', ''),
 
     (new Extend\Event())
-        ->subscribe(Listener\QueueImageDimensionsFetch::class),
+        ->listen(Posted::class, Listener\QueueImageDimensionsFetch::class.'@whenPosted')
+        ->listen(Revised::class, Listener\QueueImageDimensionsFetch::class.'@whenRevised'),
 
     (new Extend\Console())
         ->command(Console\BackfillImageDimensionsCommand::class)
@@ -95,17 +100,17 @@ return [
         ->post('/auto-image-dimensions/report', 'auto-image-dimensions.report', Api\Controller\ReportDimensionsController::class)
         ->post('/posts/{id}/refresh-image-dimensions', 'posts.refresh-image-dimensions', Api\Controller\RefreshPostDimensionsController::class),
 
-    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-    (new Extend\ApiSerializer(PostSerializer::class))
-        ->attribute('canRefreshImageDimensions', function ($serializer, $post) {
-            return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh');
-        }),
+    (new Extend\ApiResource(PostResource::class))
+        ->fields(fn () => [
+            Schema\Boolean::make('canRefreshImageDimensions')
+                ->get(fn (object $post, Context $context) => $context->getActor()->can('huoxin-auto-image-dimensions.refresh')),
+        ]),
 
-    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-    (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attribute('canReportImageDimensions', function ($serializer) {
-            return $serializer->getActor()->can('huoxin-auto-image-dimensions.report');
-        }),
+    (new Extend\ApiResource(ForumResource::class))
+        ->fields(fn () => [
+            Schema\Boolean::make('canReportImageDimensions')
+                ->get(fn (object $model, Context $context) => $context->getActor()->can('huoxin-auto-image-dimensions.report')),
+        ]),
 
     (new Extend\Formatter())
         ->configure(function (Configurator $configurator) {

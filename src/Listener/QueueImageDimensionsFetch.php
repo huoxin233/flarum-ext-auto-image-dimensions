@@ -34,18 +34,12 @@ class QueueImageDimensionsFetch
         $events->listen(Revised::class, [$this, 'whenRevised']);
     }
 
-    /**
-     * @param \Flarum\Post\Post $event
-     */
-    public function whenPosted(Posted $event)
+    public function whenPosted(Posted $event): void
     {
         $this->dispatchJob($event->post);
     }
 
-    /**
-     * @param Revised $event
-     */
-    public function whenRevised(Revised $event)
+    public function whenRevised(Revised $event): void
     {
         $this->dispatchJob($event->post);
     }
@@ -53,7 +47,7 @@ class QueueImageDimensionsFetch
     /**
      * @param \Flarum\Post\Post $post
      */
-    protected function dispatchJob($post)
+    protected function dispatchJob($post): void
     {
         if (empty($post->parsed_content) || strpos($post->parsed_content, '<IMG ') === false) {
             // Delete from queue if it existed but image was removed
