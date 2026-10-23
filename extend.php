@@ -103,7 +103,7 @@ return [
     (new Extend\ApiResource(PostResource::class))
         ->fields(fn () => [
             Schema\Boolean::make('canRefreshImageDimensions')
-                ->get(fn (object $post, Context $context) => $context->getActor()->can('huoxin-auto-image-dimensions.refresh')),
+                ->get(fn (object $post, Context $context) => $context->getActor()->can('huoxin-auto-image-dimensions.refresh', $post)),
         ]),
 
     (new Extend\ApiResource(ForumResource::class))
