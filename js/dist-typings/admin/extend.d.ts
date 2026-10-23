@@ -1,2 +1,2 @@
-declare const _default: import("flarum/common/extenders/Admin").default[];
-export default _default;
+declare const extenders: import("flarum/common/extenders/Admin").default[];
+export default extenders;
