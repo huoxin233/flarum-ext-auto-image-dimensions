@@ -115,4 +115,16 @@ class ReportDimensionsTest extends TestCase
 
         $this->assertEquals(422, $response->getStatusCode());
     }
+
+    public function test_can_report_image_dimensions_serialized_correctly()
+    {
+        $response = $this->send(
+            $this->request('GET', '/api', [
+                'authenticatedAs' => 1,
+            ])
+        );
+        $this->assertEquals(200, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertTrue($payload['data']['attributes']['canReportImageDimensions']);
+    }
 }

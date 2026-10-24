@@ -97,7 +97,7 @@ return [
 
     (new Extend\ApiSerializer(PostSerializer::class))
         ->attribute('canRefreshImageDimensions', function ($serializer, $post) {
-            return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh');
+            return $serializer->getActor()->can('huoxin-auto-image-dimensions.refresh', $post);
         }),
 
     (new Extend\ApiSerializer(ForumSerializer::class))

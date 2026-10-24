@@ -81,4 +81,25 @@ class RefreshDimensionsTest extends TestCase
         // Attributes should NOT be stripped
         $this->assertStringContainsString('width="533"', $post->parsed_content);
     }
+
+    public function test_can_refresh_image_dimensions_serialized_correctly()
+    {
+        $adminResponse = $this->send(
+            $this->request('GET', '/api/posts/1', [
+                'authenticatedAs' => 1,
+            ])
+        );
+        $this->assertEquals(200, $adminResponse->getStatusCode());
+        $adminPayload = json_decode((string) $adminResponse->getBody(), true);
+        $this->assertTrue($adminPayload['data']['attributes']['canRefreshImageDimensions']);
+
+        $userResponse = $this->send(
+            $this->request('GET', '/api/posts/1', [
+                'authenticatedAs' => 2,
+            ])
+        );
+        $this->assertEquals(200, $userResponse->getStatusCode());
+        $userPayload = json_decode((string) $userResponse->getBody(), true);
+        $this->assertFalse($userPayload['data']['attributes']['canRefreshImageDimensions']);
+    }
 }
