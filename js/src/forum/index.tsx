@@ -67,12 +67,12 @@ function scanAndReportPostImages(component: CommentPost) {
       return;
     }
 
-    if (img.dataset.reported === 'true') {
+    if (img.dataset.reportedUrl === img.src) {
       return;
     }
 
     const reportDimensions = () => {
-      img.dataset.reported = 'true';
+      img.dataset.reportedUrl = img.src;
 
       const naturalWidth = img.naturalWidth;
       const naturalHeight = img.naturalHeight;
